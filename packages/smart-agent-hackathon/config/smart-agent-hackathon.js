@@ -36,6 +36,7 @@ exports['default'] = {
       disabled: false,
       name: 'UAV',
       ethAccount: '0x20a6E2feD0e1518cd0a61B1946B3e9D064aB171b',
+      iota: 'https://testnet140.tangle.works',
 
       // every party that needs to agree on the flight plan must have it's own listener
       // and has its own account and evan.network profile

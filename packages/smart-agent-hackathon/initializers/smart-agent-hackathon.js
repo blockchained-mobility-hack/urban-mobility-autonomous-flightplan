@@ -2,9 +2,39 @@
 var request = require('request')
 const { Initializer, api } = require('actionhero')
 const { Profile, KeyProvider, Ipld, ContractState, DataContract, Description, Sharing } = require('@evan.network/blockchain-core')
+const Mam = require('mam.client.js')
+const IOTA = require('iota.lib.js')
 
 // configuration shortcut
 const config = api.config.smartAgentUAV
+
+
+const iota = new IOTA({ provider: config.iota })
+
+// Initialise MAM State - PUBLIC
+let mamState = Mam.init(iota)
+
+const iota_create = async packet => {
+  // Create MAM Payload - STRING OF TRYTES
+  const message = Mam.create(mamState, packet)
+  // Save new mamState
+  mamState = message.state
+  // Attach the payload.
+  console.log('Root: ', message.root)
+  console.log('Address: ', message.address)
+  await Mam.attach(message.payload, message.address)
+
+  return message
+}
+
+const logData = data => console.log(JSON.parse(iota.utils.fromTrytes(data)))
+
+const iota_fetch = async message => {
+  // Fetch Stream Async to Test
+  console.dir(message)
+  const resp = await Mam.fetch(message.root, 'public', null, logData)
+  console.dir(resp)
+}
 
 const listenerConnections = {}
 
@@ -268,6 +298,13 @@ module.exports = class SmartAgentUAV extends Initializer {
       listenerConnections[l] = smartAgentUAV.makeBCConnection(config.listeners[l])
       smartAgentUAV.listen(l, config.listeners[l])
     }
+
+    const message = await iota_create('Hola!')
+    await iota_create('Holala!')
+    await iota_create('Holalala!')
+    
+    iota_fetch(message)
+    
   }
   
   async start() { }

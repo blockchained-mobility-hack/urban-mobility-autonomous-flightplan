@@ -10,6 +10,6 @@
     "request": "^2.87.0"
   },
   "peerDependencies": {
-    "actionhero": "18.1.0"
+    "edge-server-seed": "^1.0"
   }
 }
