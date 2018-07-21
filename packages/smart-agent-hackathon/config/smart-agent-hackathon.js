@@ -1,3 +1,5 @@
+// normal actionhero plugin config, needs to be linked into actionhero/edge-server installation
+
 exports['default'] = {
 
   ethAccounts: {
@@ -17,7 +19,15 @@ exports['default'] = {
     return {
       disabled: false,
       name: 'UAV',
-      ethAccount: '0x20a6E2feD0e1518cd0a61B1946B3e9D064aB171b'
+      ethAccount: '0x20a6E2feD0e1518cd0a61B1946B3e9D064aB171b',
+
+      // every party that needs to agree on the flight plan must have it's own listener
+      // and has its own account and evan.network profile
+      listeners: {
+        // kinda hackish, just reusing the default account for the insurance listener
+        // if the main smart agent has to do anything writing, it should get an own account
+        insurance: '0x20a6E2feD0e1518cd0a61B1946B3e9D064aB171b',
+      }
     }
   }
 }
