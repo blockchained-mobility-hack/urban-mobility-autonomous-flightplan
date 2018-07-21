@@ -21,10 +21,11 @@ async function getWeather(lat, lng, alt) {
   })
 }
 
-function denyWeather(weather_data) {
+function denyWeather(weather_data, criteria) {
   try {
-    if(weather_data.visibility < 1000) return 'visibility ' + weather_data.visibility;
-    if(weather_data.wind.speed > 50) return 'wind speed ' + weather_data.wind.speed;
+    if(weather_data.visibility > criteria.visibility) return 'visibility ' + weather_data.visibility;
+    if(weather_data.wind.speed < criteria.wind_speed) return 'wind speed ' + weather_data.wind.speed;
+    if(weather_data.clouds.all < criteria.clouds) return 'clouds ' + weather_data.clouds.all;
     return false
   } catch(ex) { return "bad REST response" } 
 }
@@ -199,11 +200,14 @@ module.exports = class SmartAgentUAV extends Initializer {
           do { entries = await bcc.dataContract.getListEntries(contract, 'todos', account) }
           while (entries.length <= 0)
 
+          const criteria = await bcc.dataContract.getEntry(contract, 'metadata', account)
+
           const responses = []
           const replies = []
           
           for(let entry of entries ) {
             //const coord = entry.coordinates[0]
+
             const coord = { lat: 51, lng: 10, height: 200 }
             const p = query(coord.lat, coord.lng, coord.height)
 
@@ -221,8 +225,8 @@ module.exports = class SmartAgentUAV extends Initializer {
           await Promise.all(replies)
 
           for(let r of responses) {
-            let v = await r.comment
-            let denied = deny(v)
+            let v = await r.comment // should all be done already, but need to extract value
+            let denied = deny(v, criteria)
             const comment = denied ? 'Denied. ' + denied : 'Accepted.'
             r.comment = comment
           }
