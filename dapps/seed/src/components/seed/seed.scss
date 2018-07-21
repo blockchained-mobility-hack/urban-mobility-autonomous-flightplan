@@ -1,0 +1,56 @@
+@import '@evan.network/ui-angular-sass/src/variables/colors';
+@import '../../style/general';
+
+uav-overview {
+  .uav-empty-header {
+    font-size: 30px;
+    font-weight: bold;
+
+    margin-bottom: 25px;
+
+    @media (min-width: 768px) {
+      margin-top: 50px !important;
+    }
+  }
+
+  evan-empty-dapp {
+    padding-top: 25px;
+    padding-bottom: 0 !important;
+
+    img {
+      border-radius: 0;
+    }
+
+    h3 {
+      font-size: 17px;
+
+      margin-top: 25px;
+    }
+  }
+
+  @media (min-width: 769px) {
+    ion-list {
+      ion-item {
+        ion-avatar {
+          .evan-avatar-wrapper {
+            width: 100% !important;
+            height: 100% !important;
+            text-align: center;
+            padding: 0 !important;
+
+            img {
+              display: inline-block;
+              width: auto !important;
+              max-width: 100% !important;
+              height: auto !important;
+              max-height: 150px !important;
+              margin-top: 0 !important;
+              margin-bottom: 0 !important;
+              margin-left: 0 !important;
+            }
+          }
+        }
+      }
+    }
+  }
+}
