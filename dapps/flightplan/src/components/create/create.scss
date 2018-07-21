@@ -1,1 +1,13 @@
 @import '@evan.network/ui-angular-sass/src/variables/colors';
+
+agm-map {
+  height: 300px;
+}
+
+.flightplan-style {
+  ion-item {
+    .item-inner {
+      background-color: unset;
+    }
+  }
+}

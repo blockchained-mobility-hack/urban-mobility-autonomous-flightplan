@@ -21,6 +21,13 @@ import {
   startAngularApplication,
 } from 'angular-core';
 
+import { AgmCoreModule } from '@agm/core';
+// load task libaries
+import {
+  TaskLibModule,
+  TaskTranslations
+} from 'task';
+
 import { FlightPlanTranslations } from './i18n/registry';
 import { RootComponent } from './components/root/root';
 import { FlightPlanDetailComponent } from './components/detail/detail';
@@ -77,15 +84,21 @@ function getConfig(isDispatcher?: boolean) {
     imports: [
       CommonModule,
       AngularCore,
+      TaskLibModule,
     ],
     providers: [
       FlightPlanTranslations,
-      FlightPlanDispatcherService
+      FlightPlanDispatcherService,
     ],
-    exports: []
+    exports: [
+      AgmCoreModule
+    ]
   };
 
   if (!isDispatcher) {
+      config.imports.push(AgmCoreModule.forRoot({
+    apiKey: 'AIzaSyAmANSz_f9vFxV-1mzjwbUKTGMBL0en1hE'
+  }));
     config.imports.unshift(BrowserAnimationsModule);
     config.imports.unshift(RouterModule.forRoot(getRoutes(), { enableTracing: false, }));
     config.imports.push(IonicModule.forRoot(BootstrapComponent, {
@@ -102,14 +115,14 @@ function getConfig(isDispatcher?: boolean) {
       FlightPlanDetailComponent,
       FlightPlanCreateComponent
     ];
-  }
 
-  config.exports.push(
-    FlightPlanCreateComponent
-  );
-  config.exports.push(
-    FlightPlanDetailComponent
-  );
+    config.exports.push(
+      FlightPlanCreateComponent
+    );
+    config.exports.push(
+      FlightPlanDetailComponent
+    );    
+  }
   return config;
 }
 
@@ -120,7 +133,9 @@ export class DispatcherModule {
 
 @NgModule(getConfig(false))
 class FlightPlanModule {
-  constructor(private translations: FlightPlanTranslations) { }
+  constructor(
+   private translations: FlightPlanTranslations,
+   private taskTranslations: TaskTranslations) { }
 }
 
 export async function startDApp(container, dbcpName) {

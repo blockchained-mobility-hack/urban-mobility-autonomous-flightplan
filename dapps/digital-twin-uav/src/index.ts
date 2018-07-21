@@ -29,6 +29,7 @@ import { UAVCreateComponent } from './components/create/create';
 import { UAVDispatcherService } from './dispatcher/uav';
 export { UAVDispatcher, UAVDispatcherService } from './dispatcher/uav';
 
+import { AgmCoreModule } from '@agm/core';
 
 import * as FlightPlan from 'flightplan';
 
@@ -125,10 +126,13 @@ function getConfig(isDispatcher?: boolean) {
     ],
     providers: [
       Translations,
+      FlightPlan.FlightPlanTranslations,
       UAVDispatcherService
     ],
   };
-
+      config.imports.push(AgmCoreModule.forRoot({
+    apiKey: 'AIzaSyAmANSz_f9vFxV-1mzjwbUKTGMBL0en1hE'
+  }));
   if (!isDispatcher) {
     config.imports.unshift(BrowserAnimationsModule);
     config.imports.unshift(RouterModule.forRoot(getRoutes(), { enableTracing: false, }));
@@ -160,8 +164,9 @@ export class DispatcherModule {
 }
 
 @NgModule(getConfig(false))
-class SeedModule {
-  constructor(private translations: Translations) { }
+class UAVModule {
+  constructor(private translations: Translations,
+        private flightplanTranslations: FlightPlan.FlightPlanTranslations) { }
 }
 
 export async function startDApp(container, dbcpName) {
@@ -170,7 +175,7 @@ export async function startDApp(container, dbcpName) {
   // Add seed class name to the ion-app / .evan-dapp element for generalized styling
   ionicAppEl.className += ' dt-uav-style';
 
-  await startAngularApplication(SeedModule, getRoutes());
+  await startAngularApplication(UAVModule, getRoutes());
 
   container.appendChild(ionicAppEl);
 }

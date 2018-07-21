@@ -1,27 +1,37 @@
-export const en = {
-	'uav': 'Air Taxi',
-	'_uav': {
-		'create': 'Create new Air Taxi Twin',
-		'nothing-found': 'No Air Taxis found',
-		'general': 'General Taxi informations',
-		'fill-required': 'Fill out all required fields',
-		'technical-informations': 'Technical data',
-		'forms': {
-			'name': 'Name',
-			'registration-number': 'Registration Number',
-			'location': 'Location',
-			'type': 'Type (Flight taxi, UAV,...)',
-			'manufacturer': 'Manufacturer',
-			'model': 'Model',
-			'weight': 'Weight (in kg)',
-			'pilot': 'Pilot',
-			'pilot-true': 'With pilot',
-			'pilot-false': 'Autonomous',
-			'owner': 'Owner'
-		},
-	    'question-create-uav': 'Create UAV',
-   		'question-create-uav-question': 'Have you filled all fields coorectly?',
-   		'ok': 'Ok',
-   		'cancel': 'Cancel'
-	}	
+export const en ={
+  "_flightplan": {
+    "cancel": "Cancel",
+    "checks": "Checks",
+    "coordinates": "Coordinates",
+    "create": "Create",
+    "default-height": "Default flight altitude",
+    "description": "Description",
+    "dispatcher": {
+      "create-flightplan": "Create flightplan",
+      "create-flightplan-description": "A new flight plan is beeing created.."
+    },
+    "done": "Done",
+    "endDate": "End Date",
+    "fill-required": "Please fill in all fields marked with *.",
+    "finish-create": "Create your new UAV Digital Twin.",
+    "flightplan-create": "Create flightplan",
+    "flight-route": "Flight route",
+    "from": "from",
+    "general": "General Informations",
+    "height": "Height",
+    "in-progress": "Processing",
+    "lang": "Longitude",
+    "lat": "Latitude",
+    "loading": "Loading...",
+    "month-short-names": "Jan,Feb,Mar,Apr,May,Jun,Jul,Aug,Sep,Oct,Nov,Dec",
+    "name": "Name",
+    "ok": "Ok",
+    "question-create-flightplan": "Create flightplan",
+    "question-create-flightplan-question": "Have you filled in all the data correctly?",
+    "rejected": "Rejected",
+    "startDate": "Start Date",
+    "status": "Status",
+    "success": "Allowed",
+    "waypoint": "Waypoint"
+  }
 };

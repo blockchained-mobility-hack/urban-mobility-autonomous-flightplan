@@ -50,6 +50,206 @@ export class FlightPlanDispatcherService {
       
     return singleton.create(FlightPlanDispatcherService, this);
   }
+
+  
+   async createTasksForPlan(todos: any, partners = [], title: string) {
+    const tasks = await this.bcc.dataContract.create(
+      'tasks',
+      this.bcc.core.activeAccount(),
+      null
+    );
+
+    const ensDescription = await this.descriptionService.getDescription('task.evan');
+
+    // get cryptor and data to save to my profile
+    const cryptor = this.bcc.cryptoProvider.getCryptorByCryptoAlgo(
+      this.bcc.dataContract.options.defaultCryptoAlgo
+    );
+
+    const envelope = {
+      cryptoInfo: cryptor.getCryptoInfo(this.bcc.nameResolver.sha3(tasks.options.address)),
+      public: {
+        author: ensDescription.author,
+        abis: {
+          own: tasks.options.jsonInterface,
+        },
+        name: title,
+        dapp: ensDescription.dapp,
+        description: ensDescription.description,
+        i18n: ensDescription.i18n,
+        imgSquare: ensDescription.imgSquare,
+        imgWide: ensDescription.imgWide,
+        version: ensDescription.version,
+        tags: ensDescription.tags
+      }
+    };
+    
+    await this.bcc.description.setDescriptionToContract(
+      tasks.options.address, envelope, this.bcc.core.activeAccount()
+    );
+
+    await this.bcc.profile.addContract(
+      tasks.options.address,
+      envelope.public
+    );
+
+    await this.bcc.dataContract.addListEntries(
+      tasks,
+      'todos',
+      todos,
+      this.bcc.core.activeAccount(),
+    );
+    await this.bcc.dataContract.setEntry(tasks,
+      'metadata',
+      {
+        type: 'task',
+        created: Date.now(),
+        createdby: this.bcc.core.activeAccount(),
+      },
+      this.core.activeAccount()
+    );
+
+    if(partners.length > 0) {
+
+      for(let partner of partners) {
+        // get the content sharing key
+        const contentKey = await this.bcc.sharing.getKey(tasks.options.address, this.bcc.core.activeAccount(), '*');
+
+        // share the contract with the user
+        await this.bcc.sharing.addSharing(
+          tasks.options.address,
+          this.bcc.core.activeAccount(),
+          partner,
+          '*',
+          0,
+          contentKey,
+        );
+
+        const hashKey = await this.bcc.sharing.getHashKey(tasks.options.address, this.bcc.core.activeAccount());
+        await this.bcc.sharing.ensureHashKey(tasks.options.address, this.bcc.core.activeAccount(), partner, hashKey);
+
+                // invite user to contract
+        await this.bcc.dataContract.inviteToContract(
+          null,
+          tasks.options.address,
+          this.bcc.core.activeAccount(),
+          partner
+        );
+
+        // send the bmail to the invitee
+        /*await this.bcc.mailbox.sendMail(
+          ret,
+          this.bcc.core.activeAccount(),
+          partner
+        );*/
+      }
+    }
+    
+    
+    return tasks.options.address;
+  }
+
+  async doKeyExchange(targetAcc: string, alias: string) {
+    const myAccountId = this.core.activeAccount();
+    let profile = this.bcc.getProfileForAccount(targetAcc);
+
+    const targetPubKey = await profile.getPublicKey();
+    const commKey = await this.bcc.keyExchange.generateCommKey();
+    await this.bcc.keyExchange.sendInvite(targetAcc, targetPubKey, commKey, {});
+
+    // add key to profile
+    await this.bcc.profile.addContactKey(
+      targetAcc,
+      'commKey',
+      commKey
+    );
+    await this.bcc.profile.addProfileKey(
+      targetAcc, 'alias', alias
+    );
+  }
+
+  getTasksForDepartment(department) {
+    switch (department) {
+      case "dfs":
+      return [{
+            "id": this.core.utils.generateID(),
+            "alias": 'Flughöhe nicht über 300ft',
+            "order": 1000,
+            "createdFrom": this.core.activeAccount(),
+            "criteria": [],
+            "required": {},
+          },
+          {
+            "id": this.core.utils.generateID(),
+            "alias": 'Fluggebiet nicht in Flughafennähe',
+            "order": 1000,
+            "createdFrom": this.core.activeAccount(),
+            "criteria": [],
+            "required": {},
+          },
+          {
+            "id": this.core.utils.generateID(),
+            "alias": 'Fluggebiet nicht in Flughafennähe',
+            "order": 1000,
+            "createdFrom": this.core.activeAccount(),
+            "criteria": [],
+            "required": {},
+          }];
+      case "dwd":
+      return [{
+            "id": this.core.utils.generateID(),
+            "alias": 'Kein Regen vorhanden',
+            "order": 1000,
+            "createdFrom": this.core.activeAccount(),
+            "criteria": [],
+            "required": {},
+          },
+          {
+            "id": this.core.utils.generateID(),
+            "alias": 'Windgeschwindigkeit nicht über 3m/s',
+            "order": 1100,
+            "createdFrom": this.core.activeAccount(),
+            "criteria": [],
+            "required": {},
+          },
+          {
+            "id": this.core.utils.generateID(),
+            "alias": 'Keine extremen Wettervorkommnisse',
+            "order": 1200,
+            "createdFrom": this.core.activeAccount(),
+            "criteria": [],
+            "required": {},
+          }];
+      case "insurance":
+      return [{
+            "id": this.core.utils.generateID(),
+            "alias": 'Start und Endzeit liegen in der Zukunft',
+            "order": 1000,
+            "createdFrom": this.core.activeAccount(),
+            "criteria": [],
+            "required": {},
+          },
+          {
+            "id": this.core.utils.generateID(),
+            "alias": 'Police abgeschlossen',
+            "order": 1100,
+            "createdFrom": this.core.activeAccount(),
+            "criteria": [],
+            "required": {},
+          },
+          {
+            "id": this.core.utils.generateID(),
+            "alias": 'Policennummer zugewiesen',
+            "order": 1200,
+            "createdFrom": this.core.activeAccount(),
+            "criteria": [],
+            "required": {},
+          }];
+      default:
+        // code...
+        break;
+    }
+  }
 }
 
 export const FlightPlanDispatcher = new QueueDispatcher(
@@ -58,21 +258,37 @@ export const FlightPlanDispatcher = new QueueDispatcher(
       '_uav.dispatcher.title',
       '_uav.dispatcher.description',
       async (service: FlightPlanDispatcherService, queueEntry: any) => {
-        const uavs = queueEntry.data;
-        const uavDescription = await service.descriptionService.getDescription(`uavdigitaltwin.${ getDomainName() }`, true);
-        for (let uav of uavs) {
-          const digitalTwin = await service.bcc.dataContract.create(
+        const flightplans = queueEntry.data;
+        const fpDescription = await service.descriptionService.getDescription(`uavflightplan.${ getDomainName() }`, true);
+
+        for (let flightplan of flightplans) {
+          const flightPlanDT = await service.bcc.dataContract.create(
             // this is the ENS of generic test twin factory
             'dt.factory.testbc.evan',
             // your own accountID as the owner
             service.core.activeAccount(),
             null,
-            { public: uavDescription }
+            {
+              public: fpDescription
+            }
           );
-          await service.bcc.profile.addBcContract('uavtwin.evan', digitalTwin.options.address, uav)
+
+          await service.bcc.profile.loadForAccount(service.bcc.profile.treeLabels.addressBook);
+          // check if key exchange with the smart agents exist
+          if(!await service.bcc.profile.getContactKey('0xFCE2dfF569b6f715E83934d3CfCeff777916fFC7','commKey')) {
+            await service.doKeyExchange('0xFCE2dfF569b6f715E83934d3CfCeff777916fFC7', 'DWD');
+          }
+          if(!await service.bcc.profile.getContactKey('0x8958AED4D3a577298166526c37087578C5DB2Fd2','commKey')) {
+            await service.doKeyExchange('0x8958AED4D3a577298166526c37087578C5DB2Fd2', 'DFS');
+          }
+          if(!await service.bcc.profile.getContactKey('0x20a6E2feD0e1518cd0a61B1946B3e9D064aB171b','commKey')) {
+            await service.doKeyExchange('0x20a6E2feD0e1518cd0a61B1946B3e9D064aB171b', 'Versicherung');
+          }
+          await service.bcc.profile.storeForAccount(service.bcc.profile.treeLabels.addressBook);
+
           await Promise.all([
             service.bcc.rightsAndRoles.setOperationPermission(
-              digitalTwin,        // contract to be updated
+              flightPlanDT,        // contract to be updated
               service.core.activeAccount(),              // account, that can change permissions
               0,                  // role id, uint8 value
               'technicalData',                // name of the object
@@ -81,19 +297,29 @@ export const FlightPlanDispatcher = new QueueDispatcher(
               true,                       // grant this capability
             ),
             service.bcc.rightsAndRoles.setOperationPermission(
-              digitalTwin,        // contract to be updated
+              flightPlanDT,        // contract to be updated
               service.core.activeAccount(),              // account, that can change permissions
               0,                  // role id, uint8 value
-              'flightPlans',                // name of the object
+              'tasks',                // name of the object
               service.propType.ListEntry,         // what type of element is modified
               service.modType.Set,       // type of the modification
               true,                       // grant this capability
             ),
-            service.bcc.profile.storeForAccount(service.bcc.profile.treeLabels.contracts)
+            service.bcc.dataContract.addListEntries(flightplan.uavContractAddress, 'flightPlans', [flightPlanDT.options.address], service.core.activeAccount()),
+            service.bcc.dataContract.setEntry(flightPlanDT, 'technicalData', flightplan.technicalData, service.core.activeAccount())
           ]);
-          uav.weight = parseFloat(uav.weight);
-          uav.owner = service.core.activeAccount();
-          await service.bcc.dataContract.setEntry(digitalTwin, 'technicalData', uav, service.core.activeAccount())
+
+          await service.bcc.profile.loadForAccount(service.bcc.profile.treeLabels.contracts);
+
+          const tasks = await Promise.all([
+            service.createTasksForPlan(service.getTasksForDepartment('dwd'), ['0xFCE2dfF569b6f715E83934d3CfCeff777916fFC7'], 'DWD Genehmigung'),
+            service.createTasksForPlan(service.getTasksForDepartment('dfs'), ['0x8958AED4D3a577298166526c37087578C5DB2Fd2'], 'DFS Genehmigung'),
+            service.createTasksForPlan(service.getTasksForDepartment('insurance'), ['0x20a6E2feD0e1518cd0a61B1946B3e9D064aB171b'], 'Zusage Versicherung'),
+          ]);
+
+          await service.bcc.profile.storeForAccount(service.bcc.profile.treeLabels.contracts);
+
+          await service.bcc.dataContract.addListEntries(flightPlanDT, 'tasks', tasks, service.core.activeAccount())
         }
       }
     )
