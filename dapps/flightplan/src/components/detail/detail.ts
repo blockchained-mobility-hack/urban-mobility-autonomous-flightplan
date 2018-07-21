@@ -32,7 +32,7 @@ import {
 /**************************************************************************************************/
 
 @Component({
-  selector: 'uavdetail',
+  selector: 'flightplan-detail',
   templateUrl: 'detail.html',
   animations: [ ]
 })

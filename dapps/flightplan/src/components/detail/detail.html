@@ -14,5 +14,46 @@
       <span>{{ flightplan.metadata.endDate | date:'medium':'':translateService.translate.currentLang }}</span>
     </ion-col>
   </ion-row>
-
+  <h4 text-center margin-vertical>{{ flightplan.metadata.description }}</h4>
+    <div class="evan-content evan-relative transparent no-padding">
+      <agm-map
+        [latitude]="flightplan.metadata.coordinates[0].lat"
+        [longitude]="flightplan.metadata.coordinates[0].lng">
+        <agm-marker 
+            *ngFor="let m of flightplan.metadata.coordinates"
+            [latitude]="m.lat"
+            [longitude]="m.lng"
+            [label]="m.label"
+            [markerDraggable]="false">
+        </agm-marker>
+      </agm-map>
+      <div text-center>
+        <button margin-top ion-button icon-only round class="coordinate-toggle"
+          (click)="showMore = !showMore; ref.detectChanges()">
+          <ion-icon name="arrow-up" *ngIf="showMore"></ion-icon>
+          <ion-icon name="arrow-down" *ngIf="!showMore"></ion-icon>
+        </button>
+      </div>
+    </div>
+  <div class="evan-content" *ngIf="showMore">
+    <div class="table-responsive">
+      <h3 class="content-header">{{ '_flightplan.coordinates' | translate }}</h3>
+      <table>
+        <thead>
+          <tr>
+            <th>{{ '_flightplan.waypoint' | translate }}</th>
+            <th>{{ '_flightplan.lang' | translate }}</th>
+            <th>{{ '_flightplan.lat' | translate }}</th>
+            <th>{{ '_flightplan.height' | translate }}</th>
+          </tr>
+        </thead>
+        <tr *ngFor="let m of flightplan.metadata.coordinates; let i = index">
+          <td>{{ i + 1}}</td>
+          <td>{{ m.lng.toFixed(2) }}</td>
+          <td>{{ m.lat.toFixed(2) }}</td>
+          <td>{{ m.height }}</td>
+        </tr>
+      </table>
+    </div>
+  </div>    
 </ng-container>

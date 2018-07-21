@@ -1,3 +1,12 @@
 @import '@evan.network/ui-angular-sass/src/variables/colors';
 
 
+flightplan-detail {
+  button[icon-only].coordinate-toggle {
+    margin-top: -30px;
+  }
+
+  .no-padding {
+    padding: 0 !important;
+  }
+}
