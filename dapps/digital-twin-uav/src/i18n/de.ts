@@ -22,6 +22,13 @@ export const de = {
 	    'question-create-uav': 'UAV Erstellen',
    		'question-create-uav-question': 'Haben Sie alle Daten korrekt ausgefüllt?',
    		'ok': 'Ok',
-   		'cancel': 'Abbrechen'
+   		'cancel': 'Abbrechen',
+   		'flightplans': 'Flugpläne',
+   		'in-progress': 'Überprüfung',
+	    'status': 'Status',
+   		'success': 'Genehmigt',
+        'name': 'Name',
+        'technical-data': 'Technische Daten',
+        'start-stop': 'Flugstart / Flugende',
 	}
 };

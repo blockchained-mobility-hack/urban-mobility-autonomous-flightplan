@@ -22,6 +22,13 @@ export const en = {
 	    'question-create-uav': 'Create UAV',
    		'question-create-uav-question': 'Have you filled all fields coorectly?',
    		'ok': 'Ok',
-   		'cancel': 'Cancel'
+   		'cancel': 'Cancel',
+   		'flightplans': 'Flightplans',
+   		'in-progress': 'In Progress',
+	    'status': 'Status',
+   		'success': 'Accepted',
+        'name': 'Name',
+        'technical-data': 'Technical data',
+        'start-stop': 'Flightstart / Flightend',
 	}	
 };

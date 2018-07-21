@@ -109,4 +109,80 @@
       </table>
     </div>
   </div>
+
+  <div class="evan-content evan-relative">
+    <ion-grid class="no-padding">
+      <ion-row>
+        <ion-col col-8 text-nowrap>
+          <h3 class="content-header display-inline-block">{{ '_uav.flightplans' | translate }}</h3>
+          <ion-icon class="clickable reload-icon" margin-left name="refresh" (click)="reloadFlightPlans()"></ion-icon>
+        </ion-col>
+        <ion-col col-4 text-right *ngIf="allowedToCreateFlightPlans">
+          <button class="z-index-100" ion-button icon-only outline round color="primary"
+            (click)="createNewFlightPlan($event)">
+            <ion-icon name="add"></ion-icon>
+          </button>
+        </ion-col>
+      </ion-row>
+    </ion-grid>
+
+    <div class="table-responsive">
+      <table class="table table-hover">
+        <thead>
+          <tr>
+            <td>{{ '_uav.name' | translate }}</td>
+            <td>{{ '_uav.start-stop' | translate }}</td>
+            <td>{{ '_uav.status' | translate }}</td>
+            <td></td>
+          </tr>
+        </thead>
+        <tr tappable
+          *ngFor="let flightPlan of [ ].concat(queueFlightPlans, flightPlans)"
+          (click)="openFlightPlan(flightPlan)">
+          <td>
+            {{ flightPlan.metadata.name }}
+          </td>
+          <td>
+            {{ flightPlan.metadata.startDate | date:'medium':'':translateService.translate.currentLang }} :
+            {{ flightPlan.metadata.endDate | date:'medium':'':translateService.translate.currentLang }}
+          </td>
+          <td>
+            <span class="evan-label label-rounded"
+              [class.label-danger]="flightPlan.contractState == '1'"
+              [class.label-info]="flightPlan.contractState != '1' && flightPlan.contractState != '7'"
+              [class.label-success]="flightPlan.contractState == '7'">
+              <ng-container *ngIf="flightPlan.contractState == '1'">
+                {{ '_uav.rejected' | translate }}
+              </ng-container>
+              <ng-container *ngIf="flightPlan.contractState == '7'">
+                {{ '_uav.success' | translate }}
+              </ng-container>
+              <ng-container *ngIf="flightPlan.contractState != '1' && flightPlan.contractState != '7'">
+                {{ '_uav.in-progress' | translate }}
+              </ng-container>
+            </span>
+          </td>
+          <td text-right>
+            <button *ngIf="flightPlan.loading" class="loading-button" ion-button round icon-only outline>
+              <ion-spinner color="light"></ion-spinner>
+            </button>
+            <button *ngIf="!flightPlan.loading" ion-button round icon-only outline 
+              (click)="openFlightPlan(flightPlan)">
+              <ion-icon name="arrow-forward"></ion-icon>
+            </button>
+          </td>
+        </tr>
+      </table>
+    </div>
+
+    <contract-listentries #listEntryComponent
+      [contractId]="contractAddress"
+      [count]="10"
+      [dfsStorage]="true"
+      [encryptedHashes]="true"
+      [listName]="'flightPlans'"
+      [reverse]="true"
+      [onUpdate]="loadFlightPlans.bind(this)">
+    </contract-listentries>
+  </div>  
 </ng-container>
