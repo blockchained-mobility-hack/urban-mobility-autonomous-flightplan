@@ -186,11 +186,13 @@ module.exports = class SmartAgentUAV extends Initializer {
           while (entries.length <= 0)
 
           const responses = []
+          const replies = []
           
           for(let entry of entries ) {
             const coord = entry.coordinates[0]
             const p = query(coord.lat, coord.lng, coord.height)
-            
+
+            replies.push(p)
             responses.push(
               {
                 id: entry.id,
@@ -201,6 +203,8 @@ module.exports = class SmartAgentUAV extends Initializer {
               })
           }
 
+          await Promise.all(replies)
+          
           for(let r of responses) {
             denied = deny(r.comment)
             const comment = denied ? 'Denied. ' + denied : 'Accepted.'
