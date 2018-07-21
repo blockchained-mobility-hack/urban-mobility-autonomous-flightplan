@@ -62,6 +62,5 @@ export class SeedComponent extends AsyncComponent {
   }
 
   _ngOnDestroy() {
-    this.clearQueue();
   }
 }
