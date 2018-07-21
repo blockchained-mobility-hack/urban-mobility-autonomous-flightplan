@@ -1,0 +1,8 @@
+<evan-loading *ngIf="loading" delayLoading="500"></evan-loading>
+<ng-container *ngIf="!loading">
+  <dashboard-top-buttons class="on-small-move-down">
+    <button ion-button icon-only round outline (click)="navigateToUAVCreate()">
+      <ion-icon name="add"></ion-icon>
+    </button>
+  </dashboard-top-buttons>
+</ng-container>
