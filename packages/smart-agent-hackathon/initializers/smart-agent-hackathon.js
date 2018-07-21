@@ -12,7 +12,7 @@ const listenerConnections = {}
 async function getWeather(lat, lng, alt) {
   
   const reqUri = `http://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lng}&appid=1a25b5c4007f12dd2e489267db72aaf1&units=metric`
-  
+
   return new Promise( (resolve, reject) => {
     request(reqUri, (error, _, body) => {
       if ( error ) reject(error)
@@ -47,7 +47,9 @@ async function getFlyNex(lat, lng, alt) {
 // weird format and no real documentation, so just dummy logic for now, but should be somewhat realisitc behavior
 function denyFlyNex(flynex_data) {
   for(var key in flynex_data.Featuredic) {
-    const perm = flynex_data.Featuredic[key].properties.Permission
+    const v = flynex_data.Featuredic[key]
+    if(!v) continue
+    const perm = v.properties.Permission
     var reason = null;
     if (perm < 30) {
       reason = key + ' ' + flynex_data.Featuredic[key].properties.ID + ' ' + flynex_data.Featuredic[key].properties.NAME
@@ -59,8 +61,6 @@ function denyFlyNex(flynex_data) {
   }
   return false
 }
-
-
 
 module.exports = class SmartAgentUAV extends Initializer {
   constructor() {
@@ -75,6 +75,8 @@ module.exports = class SmartAgentUAV extends Initializer {
     if (config.disabled) return
 
     const taskContractType = api.eth.web3.utils.sha3('TaskDataContract')
+
+    api.smartAgentUAV = { getRegulations: getFlyNex, }
 
     // specialize from blockchain smart agent library
     class SmartAgentUAV extends api.smartAgents.SmartAgent {
@@ -158,7 +160,7 @@ module.exports = class SmartAgentUAV extends Initializer {
       makeFilter(listenerName) {
         return function(event) {
           const { eventType, contractType, member } = event.returnValues;
-          const isit = member === config.listeners[name] &&
+          const isit = member === config.listeners[listenerName] &&
                 contractType === taskContractType &&
                 eventType === '0'                      // invite
 
@@ -187,10 +189,10 @@ module.exports = class SmartAgentUAV extends Initializer {
         
         try {
 
+
           const contract = bcc.contractLoader.loadContract('DataContractInterface', contractAddress)
 
           let entries = null;
-          let denied = false;
 
           // using a hacky spinlock to wait for blockchain delays that happen sometimes
           // but since this is asynchronous and yields to other threads, this isn't too much of a problem
@@ -201,7 +203,8 @@ module.exports = class SmartAgentUAV extends Initializer {
           const replies = []
           
           for(let entry of entries ) {
-            const coord = entry.coordinates[0]
+            //const coord = entry.coordinates[0]
+            const coord = { lat: 51, lng: 10, height: 200 }
             const p = query(coord.lat, coord.lng, coord.height)
 
             replies.push(p)
@@ -216,9 +219,10 @@ module.exports = class SmartAgentUAV extends Initializer {
           }
 
           await Promise.all(replies)
-          
+
           for(let r of responses) {
-            denied = deny(r.comment)
+            let v = await r.comment
+            let denied = deny(v)
             const comment = denied ? 'Denied. ' + denied : 'Accepted.'
             r.comment = comment
           }
@@ -239,9 +243,9 @@ module.exports = class SmartAgentUAV extends Initializer {
 
         // every listener needs an own handler
         const handlers = {
-          insurance: async (event) => { iterateTodos(event, 'insurance', (lat, lng, alt) => {}, (p) => {})},
-          weather: async (event) => { iterateTodos(event, 'weather', getWeather, denyWeather)},
-          flynex: async (event) => { iterateTodos(event, 'flynex', getFlyNex, denyFlyNex)}
+          insurance: async (event) => { this.iterateTodos(event, 'insurance', (lat, lng, alt) => {}, (p) => {})},
+          weather: async (event) => { this.iterateTodos(event, 'weather', getWeather, denyWeather)},
+          flynex: async (event) => { this.iterateTodos(event, 'flynex', getFlyNex, denyFlyNex)}
         }
 
         await api.bcc.eventHub.subscribe('EventHub', null, 'ContractEvent',
