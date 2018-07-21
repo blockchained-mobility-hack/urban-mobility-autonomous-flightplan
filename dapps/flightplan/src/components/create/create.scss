@@ -1,15 +1,13 @@
 @import '@evan.network/ui-angular-sass/src/variables/colors';
 
-evan-empty-dapp {
-  img {
-    border-radius: 0px;
-  }
+agm-map {
+  height: 300px;
 }
 
-.dt-uav-style {
+.flightplan-style {
   ion-item {
     .item-inner {
-      background-color: $medium-blue;
+      background-color: unset;
     }
   }
 }

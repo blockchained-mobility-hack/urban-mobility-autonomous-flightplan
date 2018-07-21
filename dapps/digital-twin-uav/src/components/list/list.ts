@@ -25,7 +25,8 @@ import {
 } from 'angular-core';
 
 import {
-  Ipld
+  Ipld,
+  prottle
 } from 'bcc';
 
 /**************************************************************************************************/
@@ -41,10 +42,10 @@ import {
  */
 export class UAVListComponent extends AsyncComponent {
 
-  bcAddress: string = 'uav.evan';
+  bcAddress: string = 'uavtwin.evan';
 
   digitalTwinList: any = [];
-
+  digitalTwins: any = [];
   constructor(
     private _DomSanitizer: DomSanitizer,
     private alertService: EvanAlertService,
@@ -64,15 +65,58 @@ export class UAVListComponent extends AsyncComponent {
    * Setup 
    */
   async _ngOnInit() {
-
+    await this.loadContractList();
+    await this.loadMetadataForDigitalTwins();
   }
 
   _ngOnDestroy() {
   }
 
+  async loadMetadataForDigitalTwins() {
+     if (this.digitalTwinList.length) {
+      this.ref.detectChanges();
+
+      const addressesToLoad = this.digitalTwinList;
+      
+      // load the next 10 contracts simultaneously
+      await prottle(10, addressesToLoad.map(contractAddress => async () => {
+        try {
+          // load dbcp definition and contract address
+          const metadata = await this.bcc.dataContract.getEntry(
+            contractAddress,
+            'technicalData',
+            this.core.activeAccount()
+          );
+
+          // push the loaded data into the uavs array
+          this.digitalTwins.push({ contractAddress, metadata });
+          // sort the uavs with the contractlist order
+          this.digitalTwins.sort((a, b) => 
+            this.digitalTwinList.indexOf(a.contractAddress) -
+            this.digitalTwinList.indexOf(a.contractAddress)
+          );
+          // display the updates
+          this.ref.detectChanges();
+        } catch (ex) {
+          // remove the contract from the list if we can't load it
+          this.digitalTwinList.splice(this.digitalTwinList.indexOf(contractAddress), 1);
+
+          // log the error as warning
+          this.core.utils.log(this.core.utils.getErrorLog(ex), 'warning');
+        }
+      }));
+
+      this.ref.detectChanges();
+    }
+  }
+
 
   navigateToUAVCreate() {
     console.log('switch to cration of digital twin');
+  }
+
+  goToDetail(dtAddress){
+     this.routingService.navigate(`./${ dtAddress }`);
   }
 
   async loadContractList() {

@@ -1,0 +1,114 @@
+<evan-loading *ngIf="loading" delayLoading="500"></evan-loading>
+<form *ngIf="!loading" #createForm="ngForm">
+  <div class="evan-content">
+    <h2 class="content-header m-b-0">{{ '_flightplan.general' | translate }}</h2>
+    <span>{{ '_flightplan.fill-required' | translate }}</span>
+    <ion-row>
+      <ion-col col-12 col-md-6>
+        <ion-item>
+          <ion-label stacked>{{ '_flightplan.name' | translate }}*</ion-label>
+          <ion-input name="name" required
+            [(ngModel)]="flightplan.name"
+            (ionChange)="ref.detectChanges()">
+          </ion-input>
+        </ion-item>
+      </ion-col>
+      <ion-col col-12 col-md-6>
+        <ion-item>
+          <ion-label stacked>{{ '_flightplan.description' | translate }}*</ion-label>
+          <ion-input name="description" required
+            [(ngModel)]="flightplan.description"
+            (ionChange)="ref.detectChanges()">
+          </ion-input>
+        </ion-item>
+      </ion-col>
+    </ion-row>
+    <ion-row>
+      <ion-col col-12 col-md-6>
+        <ion-item>
+          <ion-label stacked>{{ '_flightplan.startDate' | translate }}*</ion-label>
+          <ion-datetime name="startDate"
+            required="true"
+            displayFormat="DD-MM-YYYY H:mm"
+            pickerFormat="DD-MMM-YYYY HH:mm"
+            [(ngModel)]="flightplan.startDate"
+            [placeholder]="'_flightplan.startDate' | translate"
+            [cancelText]="'_flightplan.cancel' | translate"
+            [doneText]="'_flightplan.done' | translate"
+            minuteValues="0,15,30,45"
+            [monthShortNames]="monthShortNames"
+            [min]="now"
+            [max]="maxDate"
+            (ionChange)="ref.detectChanges()">
+          </ion-datetime>
+        </ion-item>
+      </ion-col>
+      <ion-col col-12 col-md-6>
+        <ion-item>
+          <ion-label stacked>{{ '_flightplan.endDate' | translate }}*</ion-label>
+          <ion-datetime name="endDate"
+            required="true"
+            displayFormat="DD-MM-YYYY H:mm"
+            pickerFormat="DD-MMM-YYYY HH:mm"
+            [(ngModel)]="flightplan.endDate"
+            [placeholder]="'_flightplan.endDate' | translate"
+            [cancelText]="'_flightplan.cancel' | translate"
+            [doneText]="'_flightplan.done' | translate"
+            minuteValues="0,15,30,45"
+            [monthShortNames]="monthShortNames"
+            [min]="now"
+            [max]="maxDate"
+            (ionChange)="ref.detectChanges()">
+          </ion-datetime>
+        </ion-item>
+      </ion-col>
+    </ion-row>
+    <ion-label class="standalone">{{ '_flightplan.flight-route' | translate }}</ion-label>
+    <ion-row margin-top>
+      <ion-col col-12 col-md-6>
+        <agm-map [latitude]="48.14" [longitude]="11.56" (mapClick)="mapClicked($event)">
+          <agm-marker 
+            *ngFor="let m of flightplan.coordinates"
+            [latitude]="m.lat"
+            [longitude]="m.lng"
+            [label]="m.label"
+            [markerDraggable]="false">
+          </agm-marker>
+        </agm-map>
+      </ion-col>
+      <ion-col col-12 col-md-6>
+        <ion-item class="default-height">
+          <ion-label stacked>
+            {{ '_flightplan.default-height' | translate }}* ({{ defaultHeight }})
+          </ion-label>
+          <ion-range name="defaultHeight" min="0" max="1000" color="secondary"
+            [(ngModel)]="defaultHeight"
+            (ionChange)="ref.detectChanges()">
+            <ion-label range-left>0 ft</ion-label>
+            <ion-label range-right>1000 ft</ion-label>
+          </ion-range>
+        </ion-item>
+        <ion-item *ngFor="let m of flightplan.coordinates; let i = index">
+          <ion-label>
+            Marker: {{i}}
+          </ion-label>
+          <div item-content class="display-flex-justify">
+            <div margin-right>{{m.lng.toFixed(2)}} : {{m.lat.toFixed(2)}} Height: {{m.height}}</div>
+            <button ion-button icon-only clear item-end (click)="flightplan.coordinates.splice(i, 1); ref.detectChanges()">
+              <ion-icon name="trash"></ion-icon>
+            </button>
+          </div>
+        </ion-item>         
+      </ion-col>      
+    </ion-row>
+  </div>
+  <div class="evan-content evan-mini-content" text-center>
+    <span>{{ '_flightplan.finish-create' | translate }}</span>
+    <br>
+    <button ion-button icon-left outline round margin-top
+      [disabled]="!createForm.valid || flightplan.coordinates.length === 0"
+      (click)="createFlightPlan()">
+      {{ '_flightplan.create' | translate }}
+    </button>
+  </div>
+</form>

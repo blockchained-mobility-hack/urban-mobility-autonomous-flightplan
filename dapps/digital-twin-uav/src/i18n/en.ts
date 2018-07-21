@@ -16,7 +16,8 @@ export const en = {
 			'weight': 'Weight (in kg)',
 			'pilot': 'Pilot',
 			'pilot-true': 'With pilot',
-			'pilot-false': 'Autonomous'
+			'pilot-false': 'Autonomous',
+			'owner': 'Owner'
 		},
 	    'question-create-uav': 'Create UAV',
    		'question-create-uav-question': 'Have you filled all fields coorectly?',

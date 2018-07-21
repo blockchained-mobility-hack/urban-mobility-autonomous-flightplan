@@ -21,91 +21,52 @@ import {
   startAngularApplication,
 } from 'angular-core';
 
-import { Translations } from './i18n/registry';
-import { RootComponent } from './components/root/root';
-import { UAVListComponent } from './components/list/list';
-import { UAVDetailComponent } from './components/detail/detail';
-import { UAVCreateComponent } from './components/create/create';
-import { UAVDispatcherService } from './dispatcher/uav';
-export { UAVDispatcher, UAVDispatcherService } from './dispatcher/uav';
-
 import { AgmCoreModule } from '@agm/core';
+// load task libaries
+import {
+  TaskLibModule,
+  TaskTranslations
+} from 'task';
 
-import * as FlightPlan from 'flightplan';
+import { FlightPlanTranslations } from './i18n/registry';
+import { RootComponent } from './components/root/root';
+import { FlightPlanDetailComponent } from './components/detail/detail';
+import { FlightPlanCreateComponent } from './components/create/create';
+import { FlightPlanDispatcherService, FlightPlanDispatcher } from './dispatcher/flightplan';
+
+// defined exports to use the components and the module from the uav-digitaltwin dapp and to export
+// the dispatcher stuff
+export {
+  FlightPlanDetailComponent,
+  FlightPlanCreateComponent,
+  FlightPlanDispatcherService,
+  FlightPlanDispatcher,
+  FlightPlanTranslations
+}
 
 
 /**************************************************************************************************/
 
 function getRoutes(): Routes {
   return buildModuleRoutes(
-    `uavtwin.${ getDomainName() }`,
+    `uavflightplan.${ getDomainName() }`,
     RootComponent,
     getDashboardRoutes([
       {
         path: ``,
-        component: UAVListComponent,
+        component: FlightPlanCreateComponent,
         data: {
           state: 'list',
           navigateBack: true
         }
       },
       {
-        path: `create`,
-        component: UAVCreateComponent,
+        path: `:address`,
+        component: FlightPlanDetailComponent,
         data: {
-          state: 'create',
+          state: 'list',
           navigateBack: true
         }
-      },
-      {
-        path: `:address`,
-        data: {
-          state: 'contract',
-          navigateBack: true
-        },
-        children: [
-          {
-            path: ``,
-            data: {
-              state: 'contract',
-              navigateBack: true
-            },
-            component: UAVDetailComponent
-          },
-          {
-            path: 'flightplan-create',
-            data: {
-              state: 'contract',
-              navigateBack: true
-            },
-            component: FlightPlan.FlightPlanCreateComponent,
-          },
-          {
-            path: 'flightplan',
-            data: {
-              state: 'contract',
-              navigateBack: true
-            },
-            children: [
-              {
-                path: `:address`,
-                data: {
-                  state: 'contract',
-                  navigateBack: true
-                },
-                component: FlightPlan.FlightPlanDetailComponent
-              }
-            ]
-          },
-          {
-            path: '**',
-            data: {
-              state: 'contract',
-              navigateBack: true
-            },
-            component: DAppLoaderComponent,
-          }
-        ]
       }
     ])
   );
@@ -123,17 +84,21 @@ function getConfig(isDispatcher?: boolean) {
     imports: [
       CommonModule,
       AngularCore,
+      TaskLibModule,
     ],
     providers: [
-      Translations,
-      FlightPlan.FlightPlanTranslations,
-      UAVDispatcherService
+      FlightPlanTranslations,
+      FlightPlanDispatcherService,
     ],
+    exports: [
+      AgmCoreModule
+    ]
   };
+
+  if (!isDispatcher) {
       config.imports.push(AgmCoreModule.forRoot({
     apiKey: 'AIzaSyAmANSz_f9vFxV-1mzjwbUKTGMBL0en1hE'
   }));
-  if (!isDispatcher) {
     config.imports.unshift(BrowserAnimationsModule);
     config.imports.unshift(RouterModule.forRoot(getRoutes(), { enableTracing: false, }));
     config.imports.push(IonicModule.forRoot(BootstrapComponent, {
@@ -147,14 +112,17 @@ function getConfig(isDispatcher?: boolean) {
     config.declarations = [
       BootstrapComponent,
       RootComponent,
-      UAVListComponent,
-      UAVCreateComponent,
-      UAVDetailComponent,
-      FlightPlan.FlightPlanCreateComponent,
-      FlightPlan.FlightPlanDetailComponent
+      FlightPlanDetailComponent,
+      FlightPlanCreateComponent
     ];
-  }
 
+    config.exports.push(
+      FlightPlanCreateComponent
+    );
+    config.exports.push(
+      FlightPlanDetailComponent
+    );    
+  }
   return config;
 }
 
@@ -164,18 +132,19 @@ export class DispatcherModule {
 }
 
 @NgModule(getConfig(false))
-class UAVModule {
-  constructor(private translations: Translations,
-        private flightplanTranslations: FlightPlan.FlightPlanTranslations) { }
+class FlightPlanModule {
+  constructor(
+   private translations: FlightPlanTranslations,
+   private taskTranslations: TaskTranslations) { }
 }
 
 export async function startDApp(container, dbcpName) {
   const ionicAppEl = createIonicAppElement(container, dbcpName);
   
   // Add seed class name to the ion-app / .evan-dapp element for generalized styling
-  ionicAppEl.className += ' dt-uav-style';
+  ionicAppEl.className += ' flightplan-style';
 
-  await startAngularApplication(UAVModule, getRoutes());
+  await startAngularApplication(FlightPlanModule, getRoutes());
 
   container.appendChild(ionicAppEl);
 }
