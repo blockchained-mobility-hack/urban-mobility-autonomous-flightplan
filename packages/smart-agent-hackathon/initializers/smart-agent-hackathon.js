@@ -9,7 +9,7 @@ const config = api.config.smartAgentUAV
 const listenerConnections = {}
 
 // weather service handlers
-async function getWeather(lat, lng) {
+async function getWeather(lat, lng, alt) {
   
   const reqUri = `http://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lng}&appid=1a25b5c4007f12dd2e489267db72aaf1&units=metric`
   
@@ -22,11 +22,31 @@ async function getWeather(lat, lng) {
 }
 
 function denyWeather(weather_data) {
-  return false
+  try {
+    if(weather_data.visibility < 1000) return 'visibility ' + weather_data.visibility;
+    if(weather_data.wind.speed > 50) return 'wind speed ' + weather_data.wind.speed;
+    return false
+  } catch(ex) { return "bad REST response" } 
 }
 
 
 // flynex service handlers
+
+async function getFlyNex(lat, lng, alt) {
+  
+  const reqUri = `https://flynexapi.flynex.de/api/Airspaces/GetWhatsHereInfo?height=${alt}&lat=${lat}&lon=${lng}`
+  
+  return new Promise( (resolve, reject) => {
+    request(reqUri, (error, _, body) => {
+      if ( error ) reject(error)
+      else resolve(JSON.parse(body))
+    })
+  })
+}
+
+function denyFlyNex(weather_data) {
+
+}
 
 
 
@@ -168,7 +188,9 @@ module.exports = class SmartAgentUAV extends Initializer {
           const responses = []
           
           for(let entry of entries ) {
-            const p = query(entry)
+            const coord = entry.coordinates[0]
+            const p = query(coord.lat, coord.lng, coord.height)
+            
             responses.push(
               {
                 id: entry.id,
@@ -181,7 +203,7 @@ module.exports = class SmartAgentUAV extends Initializer {
 
           for(let r of responses) {
             denied = deny(r.comment)
-            const comment = (denied ? 'Denied.' : 'Accepted.' )
+            const comment = denied ? 'Denied. ' + denied : 'Accepted.'
             r.comment = comment
           }
 
@@ -201,9 +223,9 @@ module.exports = class SmartAgentUAV extends Initializer {
 
         // every listener needs an own handler
         const handlers = {
-          insurance: async (event) => { iterateTodos(event, 'insurance', (lat, lng) => {}, (p) => {})},
-          weather: async (event) => { iterateTodos(event, 'weather', getWeather, (p) => {})},
-          flynex: async (event) => { iterateTodos(event, 'flynex', (lat, lng) => {}, (p) => {})}
+          insurance: async (event) => { iterateTodos(event, 'insurance', (lat, lng, alt) => {}, (p) => {})},
+          weather: async (event) => { iterateTodos(event, 'weather', getWeather, denyWeather)},
+          flynex: async (event) => { iterateTodos(event, 'flynex', getFlyNex, denyFlyNex)}
         }
 
         await api.bcc.eventHub.subscribe('EventHub', null, 'ContractEvent',
