@@ -33,6 +33,10 @@ import { AgmCoreModule } from '@agm/core';
 
 import * as FlightPlan from 'flightplan';
 
+import {
+  TaskLibModule,
+  TaskTranslations
+} from 'task';
 
 /**************************************************************************************************/
 
@@ -64,14 +68,7 @@ function getRoutes(): Routes {
           navigateBack: true
         },
         children: [
-          {
-            path: ``,
-            data: {
-              state: 'contract',
-              navigateBack: true
-            },
-            component: UAVDetailComponent
-          },
+
           {
             path: 'flightplan-create',
             data: {
@@ -81,22 +78,13 @@ function getRoutes(): Routes {
             component: FlightPlan.FlightPlanCreateComponent,
           },
           {
-            path: 'flightplan',
+            path: ``,
             data: {
               state: 'contract',
               navigateBack: true
             },
-            children: [
-              {
-                path: `:address`,
-                data: {
-                  state: 'contract',
-                  navigateBack: true
-                },
-                component: FlightPlan.FlightPlanDetailComponent
-              }
-            ]
-          },
+            component: UAVDetailComponent
+          },          
           {
             path: '**',
             data: {
@@ -123,6 +111,7 @@ function getConfig(isDispatcher?: boolean) {
     imports: [
       CommonModule,
       AngularCore,
+      TaskLibModule,
     ],
     providers: [
       Translations,

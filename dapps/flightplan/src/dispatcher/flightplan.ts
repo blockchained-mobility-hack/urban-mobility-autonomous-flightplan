@@ -51,7 +51,7 @@ export class FlightPlanDispatcherService {
     return singleton.create(FlightPlanDispatcherService, this);
   }
 
-  
+
    async createTasksForPlan(todos: any, partners = [], title: string) {
     const tasks = await this.bcc.dataContract.create(
       'tasks',
@@ -259,7 +259,7 @@ export const FlightPlanDispatcher = new QueueDispatcher(
       '_uav.dispatcher.description',
       async (service: FlightPlanDispatcherService, queueEntry: any) => {
         const flightplans = queueEntry.data;
-        const fpDescription = await service.descriptionService.getDescription(`uavflightplan.${ getDomainName() }`, true);
+        const fpDescription = await service.descriptionService.getDescription(`flightplan.${ getDomainName() }`, true);
 
         for (let flightplan of flightplans) {
           const flightPlanDT = await service.bcc.dataContract.create(

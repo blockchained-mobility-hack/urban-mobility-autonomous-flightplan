@@ -33,7 +33,7 @@ import {
 /**************************************************************************************************/
 
 @Component({
-  selector: 'uavdetail',
+  selector: 'uav-dt-detail',
   templateUrl: 'detail.html',
   animations: [ ]
 })
@@ -195,7 +195,7 @@ export class UAVDetailComponent extends AsyncComponent {
 
   openFlightPlan(flightplan: any) {
     if (!flightplan.loading) {
-      this.routingService.navigate(`./flightplan/${ flightplan.contractAddress }`);
+      this.routingService.navigate(`./flightplan.${ getDomainName() }/${ flightplan.contractAddress }`);
     }
   }  
 }

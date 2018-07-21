@@ -31,6 +31,9 @@
       ],
       "flightplan": [
         "../../flightplan/dist/flightplan.js"
+      ],
+      "task": [
+        "../../../node_modules/@evan.network/task/dist/task.js"
       ]      
     }
   },

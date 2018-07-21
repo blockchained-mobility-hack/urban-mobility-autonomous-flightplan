@@ -112,7 +112,7 @@ export class UAVListComponent extends AsyncComponent {
 
 
   navigateToUAVCreate() {
-    console.log('switch to cration of digital twin');
+    this.routingService.navigate(`./create`);
   }
 
   goToDetail(dtAddress){

@@ -25,7 +25,7 @@ import {
 /**************************************************************************************************/
 
 @Component({
-  selector: 'uav-bc',
+  selector: 'uav-twin',
   templateUrl: 'root.html',
   animations: [
     createOpacityTransition(),

@@ -59,7 +59,7 @@ export const UAVDispatcher = new QueueDispatcher(
       '_uav.dispatcher.description',
       async (service: UAVDispatcherService, queueEntry: any) => {
         const uavs = queueEntry.data;
-        const uavDescription = await service.descriptionService.getDescription(`uavdigitaltwin.${ getDomainName() }`, true);
+        const uavDescription = await service.descriptionService.getDescription(`uavtwin.${ getDomainName() }`, true);
         for (let uav of uavs) {
           const digitalTwin = await service.bcc.dataContract.create(
             // this is the ENS of generic test twin factory

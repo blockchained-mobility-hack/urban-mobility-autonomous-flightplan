@@ -49,25 +49,42 @@ export {
 
 function getRoutes(): Routes {
   return buildModuleRoutes(
-    `uavflightplan.${ getDomainName() }`,
+    `flightplan.${ getDomainName() }`,
     RootComponent,
     getDashboardRoutes([
       {
-        path: ``,
+        path: `flightplan-create`,
         component: FlightPlanCreateComponent,
         data: {
-          state: 'list',
+          state: 'overview',
           navigateBack: true
         }
       },
       {
         path: `:address`,
-        component: FlightPlanDetailComponent,
         data: {
-          state: 'list',
+          state: 'contract',
           navigateBack: true
-        }
-      }
+        },
+        children: [
+          {
+            path: ``,
+            data: {
+              state: 'contract',
+              navigateBack: true
+            },
+            component: FlightPlanDetailComponent
+          },
+          {
+            path: '**',
+            data: {
+              state: 'contract',
+              navigateBack: true
+            },
+            component: DAppLoaderComponent,
+          }
+        ]
+      },
     ])
   );
 }

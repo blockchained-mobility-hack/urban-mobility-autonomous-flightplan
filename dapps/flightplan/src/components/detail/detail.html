@@ -55,5 +55,59 @@
         </tr>
       </table>
     </div>
-  </div>    
+  </div>
+  <div class="evan-content">
+    <div class="table-responsive">
+      <h3 class="content-header">{{ '_uavflightplan.checks' | translate }}</h3>
+      <table class="table table-hover">
+        <thead>
+          <tr>
+            <th>{{ '_uavflightplan.name' | translate }}</th>
+            <th>{{ '_uavflightplan.checks' | translate }}</th>
+            <th>{{ '_uavflightplan.status' | translate }}</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr tappable *ngFor="let check of flightplan.checks" (click)="openCheck(check.address)">
+            <td width="390">{{ check.name }}</td>
+            <td>
+              <span *ngIf="check.todos" [class.available]="check.solvedTodos == check.todos.length" [class.rented]="(check.solvedTodos < check.todos.length) || !check.solvedTodos">
+                {{ check.solvedTodos || '0' }}
+                {{ '_uavflightplan.from' | translate }}
+                {{ check.todos.length }}
+              </span>
+            </td>
+            <td>
+              <span class="evan-label label-rounded"
+                [class.label-info]="check.solvedTodos != check.todos.length"
+                [class.label-success]="check.solvedTodos == check.todos.length">
+                <ng-container *ngIf="check.contractState == '1'">
+                  {{ '_uavflightplan.rejected' | translate }}
+                </ng-container>
+                <ng-container *ngIf="check.solvedTodos == check.todos.length">
+                  {{ '_uavflightplan.success' | translate }}
+                </ng-container>
+                <ng-container *ngIf="check.solvedTodos != check.todos.length">
+                  {{ '_uavflightplan.in-progress' | translate }}
+                </ng-container>
+              </span>
+            </td>
+            <td text-right>
+              <button *ngIf="check.loading" class="loading-button" ion-button round icon-only outline>
+                <ion-spinner color="light"></ion-spinner>
+              </button>
+              <button *ngIf="!check.loading" ion-button round icon-only outline 
+                (click)="openCheck(check.address)">
+                <ion-icon name="arrow-forward"></ion-icon>
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+      <div text-center *ngIf="flightplan.loading">
+        <ion-spinner color="light"></ion-spinner>
+      </div>
+    </div>
+  </div>
 </ng-container>
