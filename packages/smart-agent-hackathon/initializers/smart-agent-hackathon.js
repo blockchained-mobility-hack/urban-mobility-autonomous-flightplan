@@ -20,6 +20,8 @@ module.exports = class SmartAgentUAV extends Initializer {
   async initialize() {
     if (config.disabled) return
 
+    const taskContractType = api.eth.web3.utils.sha3('TaskDataContract')
+
     // specialize from blockchain smart agent library
     class SmartAgentUAV extends api.smartAgents.SmartAgent {
 
@@ -102,8 +104,12 @@ module.exports = class SmartAgentUAV extends Initializer {
       makeFilter(listenerName) {
         return function(event) {
           const { eventType, contractType, member } = event.returnValues;
-          api.log(`event filter: ${listenerName}`)
-          return false
+          const isit = member === config.listeners[name] &&
+                contractType === taskContractType &&
+                eventType === '0';                     // invite
+
+          api.log(`event filter: ${listenerName} ${isit}`)
+          return isit
         }
       }
 
