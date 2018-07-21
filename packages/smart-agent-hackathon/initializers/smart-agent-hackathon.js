@@ -8,6 +8,28 @@ const config = api.config.smartAgentUAV
 
 const listenerConnections = {}
 
+// weather service handlers
+async function getWeather(lat, lng) {
+  
+  const reqUri = `http://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lng}&appid=1a25b5c4007f12dd2e489267db72aaf1&units=metric`
+  
+  return new Promise( (resolve, reject) => {
+    request(reqUri, (error, _, body) => {
+      if ( error ) reject(error)
+      else resolve(JSON.parse(body))
+    })
+  })
+}
+
+function denyWeather(weather_data) {
+  return false
+}
+
+
+// flynex service handlers
+
+
+
 module.exports = class SmartAgentUAV extends Initializer {
   constructor() {
     super()
@@ -179,9 +201,9 @@ module.exports = class SmartAgentUAV extends Initializer {
 
         // every listener needs an own handler
         const handlers = {
-          insurance: async (event) => { iterateTodos(event, 'insurance', (p) => {}, (p) => {})},
-          weather: async (event) => { iterateTodos(event, 'weather', (p) => {}, (p) => {})},
-          flynex: async (event) => { iterateTodos(event, 'flynex', (p) => {}, (p) => {})}
+          insurance: async (event) => { iterateTodos(event, 'insurance', (lat, lng) => {}, (p) => {})},
+          weather: async (event) => { iterateTodos(event, 'weather', getWeather, (p) => {})},
+          flynex: async (event) => { iterateTodos(event, 'flynex', (lat, lng) => {}, (p) => {})}
         }
 
         await api.bcc.eventHub.subscribe('EventHub', null, 'ContractEvent',

@@ -10,9 +10,8 @@ exports['default'] = {
     // flynex
     '0x8958AED4D3a577298166526c37087578C5DB2Fd2' : 'f545549446343dd1e47bd81cebebbbc5b74607758512d22c631b223db57106a5',
 
-    // insurance
-    '0x20a6E2feD0e1518cd0a61B1946B3e9D064aB171b' : '13ad711b451e228c176a4507f16271b61e83efabfcc50abe2881aaae225fdc1e'
-
+    // weather
+    '0xFCE2dfF569b6f715E83934d3CfCeff777916fFC7' : '3e9a0130dae617e0b09e17a91072cc301fd203e4b24f1fe0c458621b18a32318',
   },
 
   encryptionKeys: {
@@ -45,7 +44,7 @@ exports['default'] = {
         // if the main smart agent has to do anything writing, it should get an own account
         insurance: '0x20a6E2feD0e1518cd0a61B1946B3e9D064aB171b',
         flynex: '0x8958AED4D3a577298166526c37087578C5DB2Fd2',
-        insurance: '0x20a6E2feD0e1518cd0a61B1946B3e9D064aB171b'
+        weather: '0xFCE2dfF569b6f715E83934d3CfCeff777916fFC7',
       }
     }
   }
