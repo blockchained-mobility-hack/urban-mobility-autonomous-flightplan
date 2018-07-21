@@ -44,8 +44,20 @@ async function getFlyNex(lat, lng, alt) {
   })
 }
 
-function denyFlyNex(weather_data) {
-
+// weird format and no real documentation, so just dummy logic for now, but should be somewhat realisitc behavior
+function denyFlyNex(flynex_data) {
+  for(var key in flynex_data.Featuredic) {
+    const perm = flynex_data.Featuredic[key].properties.Permission
+    var reason = null;
+    if (perm < 30) {
+      reason = key + ' ' + flynex_data.Featuredic[key].properties.ID + ' ' + flynex_data.Featuredic[key].properties.NAME
+      for(var entry of flynex_data.Collisions.Info.Value) {
+        if(entry.key == key) return reason + ' / ' + entry.value
+      }
+      return reason
+    }
+  }
+  return false
 }
 
 
