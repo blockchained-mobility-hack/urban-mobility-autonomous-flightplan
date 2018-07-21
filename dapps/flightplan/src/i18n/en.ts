@@ -11,7 +11,7 @@ export const en ={
       "create-flightplan-description": "A new flight plan is beeing created.."
     },
     "done": "Done",
-    "endDate": "End Date",
+    "endDate": "Flight finish",
     "fill-required": "Please fill in all fields marked with *.",
     "finish-create": "Create your new UAV Digital Twin.",
     "flightplan-create": "Create flightplan",
@@ -29,7 +29,7 @@ export const en ={
     "question-create-flightplan": "Create flightplan",
     "question-create-flightplan-question": "Have you filled in all the data correctly?",
     "rejected": "Rejected",
-    "startDate": "Start Date",
+    "startDate": "Flight start",
     "status": "Status",
     "success": "Allowed",
     "waypoint": "Waypoint"

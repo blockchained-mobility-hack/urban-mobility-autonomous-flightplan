@@ -11,7 +11,7 @@ export const de = {
       "create-flightplan-description": "Ein neuer Flugplan wird erstellt."
     },
     "done": "Fertig",
-    "endDate": "Enddatum",
+    "endDate": "Flugende",
     "fill-required": "Bitte füllen Sie alle mit * gekennzeichneten Felder aus.",
     "finish-create": "Erstellen Sie Ihren neuen Flugplan.",
     "flightplan-create": "Flugplan erstellen",
@@ -29,7 +29,7 @@ export const de = {
     "question-create-flightplan": "Flugplan erstellen",
     "question-create-flightplan-question": "Haben Sie alle Daten korrekt ausgefüllt?",
     "rejected": "Abgelehnt",
-    "startDate": "Startdatum",
+    "startDate": "Flugstart",
     "status": "Status",
     "success": "Genehmigt",
     "waypoint": "Wegpunkte"

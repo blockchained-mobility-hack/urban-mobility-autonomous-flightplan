@@ -44,9 +44,7 @@ export class FlightPlanDetailComponent extends AsyncComponent {
 
 
   private contractAddress;
-  private allowedToCreateFlightPlans;
-  private dbcp;
-  private metadata;
+  private flightplan;
   constructor(
     private _DomSanitizer: DomSanitizer,
     private alertService: EvanAlertService,
@@ -67,44 +65,35 @@ export class FlightPlanDetailComponent extends AsyncComponent {
    */
   async _ngOnInit() {
     // get contract address from url
-    this.contractAddress = this.routingService.getHashParam('address');
-      
-    // wath the window size when it changes, detect changes
-    this.core.utils.windowSize(() => {
-      this.ref.detectChanges();
-    });
+    this.contractAddress = this.routingService.getHashParam('address');   
+   
+    try {
+      // load the technical informations
+      this.flightplan = await this.loadFlightPlan(this.contractAddress, () => {
+        this.ref.detectChanges();
+      });
 
-    // is the user the owner and is permitted to create flightplans?
-    this.allowedToCreateFlightPlans = await this.bcc.rightsAndRoles.hasUserRole(
-      this.contractAddress,
-      this.core.activeAccount(),
-      this.core.activeAccount(),
-      0 // => owner
+    } catch (ex) {
+
+    }
+  }
+
+  public async loadFlightPlan(contractAddress: string, onUpdate?: Function): Promise<any> {
+    const activeAccount = this.core.activeAccount();
+
+    // load metadata
+    const metadata = await this.bcc.dataContract.getEntry(
+      contractAddress,
+      'technicalData',
+      activeAccount
     );
 
-    // load dbcp
-    this.dbcp = await this.descriptionService.getDescription(this.contractAddress);
-
-        try {
-      // load the technical informations
-      this.metadata = await this.bcc.dataContract.getEntry(
-        this.contractAddress,
-        'technicalData',
-        this.core.activeAccount()
-      );
-
-      // add translation for dapp-wrapper header
-      this.translateService.addSingleTranslation(this.contractAddress, this.metadata.name);
-    } catch (ex) {
-      this.core.utils.log(this.core.utils.getErrorLog(ex));
-      // show error for user
-      try {
-        this.alertService.showAlert(
-          '_uavdigitaltwin.generic-error',
-          this.core.utils.getErrorLog(ex),
-        );
-      } catch (ex) { }
+    // create the return value
+    let flightPlan = {
+      metadata,
+      loading: true
     }
+    return flightPlan;
   }
 
   _ngOnDestroy() {
