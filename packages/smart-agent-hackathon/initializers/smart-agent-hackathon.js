@@ -179,7 +179,9 @@ module.exports = class SmartAgentUAV extends Initializer {
 
         // every listener needs an own handler
         const handlers = {
-          insurance: async (event) => { iterateTodos(event, 'insurance', (p) => {}, (p) => {})}
+          insurance: async (event) => { iterateTodos(event, 'insurance', (p) => {}, (p) => {})},
+          weather: async (event) => { iterateTodos(event, 'weather', (p) => {}, (p) => {})},
+          flynex: async (event) => { iterateTodos(event, 'flynex', (p) => {}, (p) => {})}
         }
 
         await api.bcc.eventHub.subscribe('EventHub', null, 'ContractEvent',
