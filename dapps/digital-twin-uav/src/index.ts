@@ -109,7 +109,7 @@ export async function startDApp(container, dbcpName) {
   const ionicAppEl = createIonicAppElement(container, dbcpName);
   
   // Add seed class name to the ion-app / .evan-dapp element for generalized styling
-  ionicAppEl.className += ' seed-style';
+  ionicAppEl.className += ' dt-uav-style';
 
   await startAngularApplication(SeedModule, getRoutes());
 
