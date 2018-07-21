@@ -5,7 +5,8 @@ import {
 import {
   Component,     // @angular/core
   DomSanitizer,
-  ChangeDetectorRef
+  ChangeDetectorRef,
+  ViewChild
 } from 'angular-libs';
 
 import {
@@ -31,19 +32,16 @@ import {
 /**************************************************************************************************/
 
 @Component({
-  selector: 'uavlist',
-  templateUrl: 'list.html',
+  selector: 'uavcreate',
+  templateUrl: 'create.html',
   animations: [ ]
 })
 
-/**
- * Overview over all created uav by the current user.
- */
-export class UAVListComponent extends AsyncComponent {
+export class UAVCreateComponent extends AsyncComponent {
 
-  bcAddress: string = 'uav.evan';
+  @ViewChild('ViewChild') createForm: any;
 
-  digitalTwinList: any = [];
+  private uav: any;
 
   constructor(
     private _DomSanitizer: DomSanitizer,
@@ -63,23 +61,46 @@ export class UAVListComponent extends AsyncComponent {
   /**
    * Setup 
    */
-  async _ngOnInit() {
+  async _ngAfterViewInit() {
+    setTimeout(() => this.ref.detectChanges());
+  }
 
+  // set the initial default values for the air taxi
+  async _ngOnInit() {
+    this.uav = {
+      pilot: false,
+      owner: [ ]
+    };
   }
 
   _ngOnDestroy() {
   }
 
+  async createUAV() {
+    // ask if the user is ready to create
+    try {
+      await this.alertService.showSubmitAlert(
+        '_uav.question-create-uav',
+        '_uav.question-create-uav-question',
+        '_uav.cancel',
+        '_uav.ok',
+      );
+    } catch (ex) {
+      return;
+    }
 
-  navigateToUAVCreate() {
-    console.log('switch to cration of digital twin');
-  }
+    //use the active account to set the owner for the twin
+    this.uav.owner = this.core.activeAccount();
 
-  async loadContractList() {
-    // load all contract addresses for my account, purge the crypto info and apply the contracts to
-    // the contract list
-    const contracts = (await this.bcc.profile.getBcContracts(this.bcAddress)) || { };
-    Ipld.purgeCryptoInfo(contracts);
-    this.digitalTwinList = Object.keys(contracts);
+    // start the queue!
+    this.queueService.addQueueData(
+      new QueueId(
+        `uavtwin.${ getDomainName() }`,
+        'UAVDispatcher'
+      ),
+      this.uav
+    );
+
+    this.routingService.goBack();
   }
 }

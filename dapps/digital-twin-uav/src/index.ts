@@ -24,8 +24,9 @@ import {
 import { Translations } from './i18n/registry';
 import { RootComponent } from './components/root/root';
 import { UAVListComponent } from './components/list/list';
-import { SeedDispatcherService } from './dispatcher/seed';
-export { SeedDispatcher, SeedDispatcherService } from './dispatcher/seed';
+import { UAVCreateComponent } from './components/create/create';
+import { UAVDispatcherService } from './dispatcher/uav';
+export { UAVDispatcher, UAVDispatcherService } from './dispatcher/uav';
 /**************************************************************************************************/
 
 function getRoutes(): Routes {
@@ -41,6 +42,14 @@ function getRoutes(): Routes {
           navigateBack: true
         }
       },
+      {
+        path: `create`,
+        component: UAVCreateComponent,
+        data: {
+          state: 'create',
+          navigateBack: true
+        }
+      },      
     ])
   );
 }
@@ -60,7 +69,7 @@ function getConfig(isDispatcher?: boolean) {
     ],
     providers: [
       Translations,
-      SeedDispatcherService
+      UAVDispatcherService
     ],
   };
 
@@ -79,6 +88,7 @@ function getConfig(isDispatcher?: boolean) {
       BootstrapComponent,
       RootComponent,
       UAVListComponent,
+      UAVCreateComponent
     ];
   }
 

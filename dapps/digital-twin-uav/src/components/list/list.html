@@ -5,4 +5,18 @@
       <ion-icon name="add"></ion-icon>
     </button>
   </dashboard-top-buttons>
+ <div evan-content text-center padding class="evan-content evan-mini-content transparent"
+    *ngIf="digitalTwinList.length === 0">
+    <h1 class="uav-empty-header">{{ 'uav' | translate }}</h1>
+    <evan-empty-dapp
+      [text]="'_uav.nothing-found' | translate "
+      ensAddress="uavtwin">
+    </evan-empty-dapp>
+    <div>
+      <button margin ion-button round (click)="navigateToUAVCreate()">
+        <ion-spinner *ngIf="sectionLoading" color="light"></ion-spinner>
+        <span>{{ '_uav.create' | translate }}</span>
+      </button>
+    </div>
+  </div>
 </ng-container>
