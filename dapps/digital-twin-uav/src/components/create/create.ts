@@ -5,7 +5,8 @@ import {
 import {
   Component,     // @angular/core
   DomSanitizer,
-  ChangeDetectorRef
+  ChangeDetectorRef,
+  ViewChild
 } from 'angular-libs';
 
 import {
@@ -31,19 +32,16 @@ import {
 /**************************************************************************************************/
 
 @Component({
-  selector: 'uavlist',
-  templateUrl: 'list.html',
+  selector: 'uavcreate',
+  templateUrl: 'create.html',
   animations: [ ]
 })
 
-/**
- * Overview over all created uav by the current user.
- */
-export class UAVListComponent extends AsyncComponent {
+export class UAVCreateComponent extends AsyncComponent {
 
-  bcAddress: string = 'uav.evan';
+  @ViewChild('ViewChild') createForm: any;
 
-  digitalTwinList: any = [];
+  private taxi: any = {};
 
   constructor(
     private _DomSanitizer: DomSanitizer,
@@ -63,23 +61,15 @@ export class UAVListComponent extends AsyncComponent {
   /**
    * Setup 
    */
-  async _ngOnInit() {
-
+  async _ngAfterViewInit() {
+    setTimeout(() => this.ref.detectChanges());
   }
+
 
   _ngOnDestroy() {
   }
 
-
-  navigateToUAVCreate() {
-    console.log('switch to cration of digital twin');
-  }
-
-  async loadContractList() {
-    // load all contract addresses for my account, purge the crypto info and apply the contracts to
-    // the contract list
-    const contracts = (await this.bcc.profile.getBcContracts(this.bcAddress)) || { };
-    Ipld.purgeCryptoInfo(contracts);
-    this.digitalTwinList = Object.keys(contracts);
+  createUAV() {
+    console.dir(this.taxi)
   }
 }
