@@ -106,7 +106,7 @@ module.exports = class SmartAgentUAV extends Initializer {
           const { eventType, contractType, member } = event.returnValues;
           const isit = member === config.listeners[name] &&
                 contractType === taskContractType &&
-                eventType === '0';                     // invite
+                eventType === '0'                      // invite
 
           api.log(`event filter: ${listenerName} ${isit}`)
           return isit
@@ -124,10 +124,11 @@ module.exports = class SmartAgentUAV extends Initializer {
           so you can parametrize this and have a general "Listener Function"
       */
       
-      async iterateTodos(event, serviceName, bcc, query, deny) {
+      async iterateTodos(event, serviceName, query, deny) {
 
         const account = config.listeners[serviceName]
-        const { contractAddress } = event.returnValues;
+        const { contractAddress } = event.returnValues
+        const bcc = listenerConnections[serviceName]
         api.log(`handle UAV ${serviceName} ${account} task: ${contractAddress}`)
         
         try {
@@ -135,6 +136,7 @@ module.exports = class SmartAgentUAV extends Initializer {
           const contract = bcc.contractLoader.loadContract('DataContractInterface', contractAddress)
 
           let entries = null;
+          let denied = false;
 
           // using a hacky spinlock to wait for blockchain delays that happen sometimes
           // but since this is asynchronous and yields to other threads, this isn't too much of a problem
@@ -144,10 +146,21 @@ module.exports = class SmartAgentUAV extends Initializer {
           const responses = []
           
           for(let entry of entries ) {
-            
+            const p = query(entry)
+            responses.push(
+              {
+                id: entry.id,
+                solver: account,
+                solverAlias: 'Smart Agent UAV ' + serviceName,
+                comment: p,
+                solveTime: (new Date()).getTime(),
+              })
           }
 
           for(let r of responses) {
+            denied = deny(r.comment)
+            const comment = (denied ? 'Denied.' : 'Accepted.' )
+            r.comment = comment
           }
 
           await bcc.dataContract.addListEntries(contract, 'todologs', responses , account)
@@ -166,7 +179,7 @@ module.exports = class SmartAgentUAV extends Initializer {
 
         // every listener needs an own handler
         const handlers = {
-          insurance: async (event) => {}
+          insurance: async (event) => { iterateTodos(event, 'insurance', (p) => {}, (p) => {})}
         }
 
         await api.bcc.eventHub.subscribe('EventHub', null, 'ContractEvent',
