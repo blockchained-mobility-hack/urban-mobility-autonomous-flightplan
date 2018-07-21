@@ -8,6 +8,60 @@ const config = api.config.smartAgentUAV
 
 const listenerConnections = {}
 
+// weather service handlers
+async function getWeather(lat, lng, alt) {
+  
+  const reqUri = `http://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lng}&appid=1a25b5c4007f12dd2e489267db72aaf1&units=metric`
+  
+  return new Promise( (resolve, reject) => {
+    request(reqUri, (error, _, body) => {
+      if ( error ) reject(error)
+      else resolve(JSON.parse(body))
+    })
+  })
+}
+
+function denyWeather(weather_data) {
+  try {
+    if(weather_data.visibility < 1000) return 'visibility ' + weather_data.visibility;
+    if(weather_data.wind.speed > 50) return 'wind speed ' + weather_data.wind.speed;
+    return false
+  } catch(ex) { return "bad REST response" } 
+}
+
+
+// flynex service handlers
+
+async function getFlyNex(lat, lng, alt) {
+  
+  const reqUri = `https://flynexapi.flynex.de/api/Airspaces/GetWhatsHereInfo?height=${alt}&lat=${lat}&lon=${lng}`
+  
+  return new Promise( (resolve, reject) => {
+    request(reqUri, (error, _, body) => {
+      if ( error ) reject(error)
+      else resolve(JSON.parse(body))
+    })
+  })
+}
+
+// weird format and no real documentation, so just dummy logic for now, but should be somewhat realisitc behavior
+function denyFlyNex(flynex_data) {
+  for(var key in flynex_data.Featuredic) {
+    const perm = flynex_data.Featuredic[key].properties.Permission
+    var reason = null;
+    if (perm < 30) {
+      reason = key + ' ' + flynex_data.Featuredic[key].properties.ID + ' ' + flynex_data.Featuredic[key].properties.NAME
+      for(var entry of flynex_data.Collisions.Info.Value) {
+        if(entry.key == key) return reason + ' / ' + entry.value
+      }
+      return reason
+    }
+  }
+  return false
+}
+
+
+
 module.exports = class SmartAgentUAV extends Initializer {
   constructor() {
     super()
@@ -20,8 +74,12 @@ module.exports = class SmartAgentUAV extends Initializer {
   async initialize() {
     if (config.disabled) return
 
+    const taskContractType = api.eth.web3.utils.sha3('TaskDataContract')
+
     // specialize from blockchain smart agent library
     class SmartAgentUAV extends api.smartAgents.SmartAgent {
+
+      async initialize () { await super.initialize() }
 
       // every indpendent listener has own account and needs own connection
       makeBCConnection(account) {
@@ -100,12 +158,80 @@ module.exports = class SmartAgentUAV extends Initializer {
       makeFilter(listenerName) {
         return function(event) {
           const { eventType, contractType, member } = event.returnValues;
-          api.log(`event filter: ${listenerName}`)
-          return false
+          const isit = member === config.listeners[name] &&
+                contractType === taskContractType &&
+                eventType === '0'                      // invite
+
+          api.log(`event filter: ${listenerName} ${isit}`)
+          return isit
         }
       }
+
+      /*
+        the handlers basically do all the same:
+          1. load the contract from the event
+          2. read the query paramters from the contract
+          3. query the 3rd party API
+          4. examine the data and make a decision
+          5. write the decision back into the contract
+
+          so you can parametrize this and have a general "Listener Function"
+      */
       
-      async initialize () { await super.initialize() }
+      async iterateTodos(event, serviceName, query, deny) {
+
+        const account = config.listeners[serviceName]
+        const { contractAddress } = event.returnValues
+        const bcc = listenerConnections[serviceName]
+        api.log(`handle UAV ${serviceName} ${account} task: ${contractAddress}`)
+        
+        try {
+
+          const contract = bcc.contractLoader.loadContract('DataContractInterface', contractAddress)
+
+          let entries = null;
+          let denied = false;
+
+          // using a hacky spinlock to wait for blockchain delays that happen sometimes
+          // but since this is asynchronous and yields to other threads, this isn't too much of a problem
+          do { entries = await bcc.dataContract.getListEntries(contract, 'todos', account) }
+          while (entries.length <= 0)
+
+          const responses = []
+          const replies = []
+          
+          for(let entry of entries ) {
+            const coord = entry.coordinates[0]
+            const p = query(coord.lat, coord.lng, coord.height)
+
+            replies.push(p)
+            responses.push(
+              {
+                id: entry.id,
+                solver: account,
+                solverAlias: 'Smart Agent UAV ' + serviceName,
+                comment: p,
+                solveTime: (new Date()).getTime(),
+              })
+          }
+
+          await Promise.all(replies)
+          
+          for(let r of responses) {
+            denied = deny(r.comment)
+            const comment = denied ? 'Denied. ' + denied : 'Accepted.'
+            r.comment = comment
+          }
+
+          await bcc.dataContract.addListEntries(contract, 'todologs', responses , account)
+          api.log(`Finished ${serviceName} task ${contractAddress}`)
+
+        }
+        catch (ex) {  api.log(`error occurred while handling ${account}; ${ ex.message || ex }${ex.stack ? ex.stack : ''}`, 'warning') }
+
+      }
+
+      
 
       // generic listener to blockchain events
       async listen(serviceName, serviceAccount) {
@@ -113,7 +239,9 @@ module.exports = class SmartAgentUAV extends Initializer {
 
         // every listener needs an own handler
         const handlers = {
-          insurance: async (event) => {}
+          insurance: async (event) => { iterateTodos(event, 'insurance', (lat, lng, alt) => {}, (p) => {})},
+          weather: async (event) => { iterateTodos(event, 'weather', getWeather, denyWeather)},
+          flynex: async (event) => { iterateTodos(event, 'flynex', getFlyNex, denyFlyNex)}
         }
 
         await api.bcc.eventHub.subscribe('EventHub', null, 'ContractEvent',
