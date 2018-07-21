@@ -23,6 +23,8 @@ module.exports = class SmartAgentUAV extends Initializer {
     // specialize from blockchain smart agent library
     class SmartAgentUAV extends api.smartAgents.SmartAgent {
 
+      async initialize () { await super.initialize() }
+
       // every indpendent listener has own account and needs own connection
       makeBCConnection(account) {
 
@@ -104,8 +106,53 @@ module.exports = class SmartAgentUAV extends Initializer {
           return false
         }
       }
+
+      /*
+        the handlers basically do all the same:
+          1. load the contract from the event
+          2. read the query paramters from the contract
+          3. query the 3rd party API
+          4. examine the data and make a decision
+          5. write the decision back into the contract
+
+          so you can parametrize this and have a general "Listener Function"
+      */
       
-      async initialize () { await super.initialize() }
+      async iterateTodos(event, serviceName, bcc, query, deny) {
+
+        const account = config.listeners[serviceName]
+        const { contractAddress } = event.returnValues;
+        api.log(`handle UAV ${serviceName} ${account} task: ${contractAddress}`)
+        
+        try {
+
+          const contract = bcc.contractLoader.loadContract('DataContractInterface', contractAddress)
+
+          let entries = null;
+
+          // using a hacky spinlock to wait for blockchain delays that happen sometimes
+          // but since this is asynchronous and yields to other threads, this isn't too much of a problem
+          do { entries = await bcc.dataContract.getListEntries(contract, 'todos', account) }
+          while (entries.length <= 0)
+
+          const responses = []
+          
+          for(let entry of entries ) {
+            
+          }
+
+          for(let r of responses) {
+          }
+
+          await bcc.dataContract.addListEntries(contract, 'todologs', responses , account)
+          api.log(`Finished ${serviceName} task ${contractAddress}`)
+
+        }
+        catch (ex) {  api.log(`error occurred while handling ${account}; ${ ex.message || ex }${ex.stack ? ex.stack : ''}`, 'warning') }
+
+      }
+
+      
 
       // generic listener to blockchain events
       async listen(serviceName, serviceAccount) {
