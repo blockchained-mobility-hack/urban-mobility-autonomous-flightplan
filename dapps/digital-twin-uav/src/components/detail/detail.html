@@ -1,0 +1,112 @@
+<evan-loading *ngIf="loading" delayLoading="500"></evan-loading>
+<ng-container *ngIf="!loading">
+  <ng-container *ngIf="!loading && metadata">
+  <div text-center>
+    <ion-row>
+      <ion-col col-6 class="display-flex-justify" *ngIf="core.utils.isXL">
+        <img class="clickable" *oneTime
+          [src]="_DomSanitizer.bypassSecurityTrustUrl(metadata.picture)"
+          (click)="openPictureDetail(metadata.picture)">
+      </ion-col>
+      <ion-col col-6 *ngIf="core.utils.isXL">
+        <div class="evan-content evan-relative">
+          <div class="table-responsive">
+            <h3 class="content-header">{{ '_uav.technical-data' | translate }}</h3>
+            <table>
+              <tr>
+                <td>{{ '_uav.forms.name' | translate }}</td>
+                <td>{{ metadata.name }}</td>
+              </tr>
+              <tr>
+                <td>{{ '_uav.forms.registration-number' | translate }}</td>
+                <td>{{ metadata.registrationNumber }}</td>
+              </tr>
+              <tr>
+                <td>{{ '_uav.forms.owner' | translate }}</td>
+                <td>{{ metadata.owner }}</td>
+              </tr>
+              <tr>
+                <td>{{ '_uav.forms.location' | translate }}</td>
+                <td>{{ metadata.location }}</td>
+              </tr>
+              <tr>
+                <td>{{ '_uav.forms.type' | translate }}</td>
+                <td>{{ metadata.type }}</td>
+              </tr>
+              <tr>
+                <td>{{ '_uav.forms.manufacturer' | translate }}</td>
+                <td>{{ metadata.manufacturer }}</td>
+              </tr>
+              <tr>
+                <td>{{ '_uav.forms.model' | translate }}</td>
+                <td>{{ metadata.model }}</td>
+              </tr>
+              <tr>
+                <td>{{ '_uav.forms.weight' | translate }}</td>
+                <td>{{ metadata.weight }}</td>
+              </tr>
+              <tr>
+                <td>{{ '_uav.forms.pilot' | translate }}</td>
+                <td>{{ ('_uav.forms.pilot-' + metadata.pilot)  | translate }}</td> 
+              </tr>
+            </table>
+          </div>
+        </div>
+      </ion-col>
+    </ion-row>
+    <div col-12 *ngIf="!core.utils.isXL">
+      <img class="clickable" *oneTime
+        [src]="_DomSanitizer.bypassSecurityTrustUrl(metadata.picture)"
+        (click)="openPictureDetail(metadata.picture)">
+      <br>
+      <button margin-top ion-button outline round (click)="showMore = !showMore; ref.detectChanges()">
+        {{ (showMore ? '_uav.showLess' : '_uav.showMore') | translate }}
+      </button>
+    </div>
+
+  </div>
+
+  <div class="evan-content evan-relative" *ngIf="showMore && !core.utils.isXL" >
+    <div class="table-responsive">
+      <h3 class="content-header">{{ '_uav.technical-data' | translate }}</h3>
+      <table>
+        <tr>
+          <td>{{ '_uav.forms.name' | translate }}</td>
+          <td>{{ metadata.name }}</td>
+        </tr>
+        <tr>
+          <td>{{ '_uav.forms.registration-number' | translate }}</td>
+          <td>{{ metadata.registrationNumber }}</td>
+        </tr>
+        <tr>
+          <td>{{ '_uav.forms.owner' | translate }}</td>
+          <td>{{ metadata.owner }}</td>
+        </tr>
+        <tr>
+          <td>{{ '_uav.forms.location' | translate }}</td>
+          <td>{{ metadata.location }}</td>
+        </tr>
+        <tr>
+          <td>{{ '_uav.forms.type' | translate }}</td>
+          <td>{{ metadata.type }}</td>
+        </tr>
+        <tr>
+          <td>{{ '_uav.forms.manufacturer' | translate }}</td>
+          <td>{{ metadata.manufacturer }}</td>
+        </tr>
+        <tr>
+          <td>{{ '_uav.forms.model' | translate }}</td>
+          <td>{{ metadata.model }}</td>
+        </tr>
+        <tr>
+          <td>{{ '_uav.forms.weight' | translate }}</td>
+          <td>{{ metadata.weight }}</td>
+        </tr>
+        <tr>
+          <td>{{ '_uav.forms.pilot' | translate }}</td>
+          <td>{{ ('_uav.forms.pilot-' + metadata.pilot)  | translate }}</td> 
+        </tr>
+      </table>
+    </div>
+  </div>
+</ng-container>

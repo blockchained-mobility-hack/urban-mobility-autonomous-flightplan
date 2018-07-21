@@ -28,10 +28,7 @@
       ],
       "angular-core": [
         "../../../node_modules/@evan.network/ui-angular-core/dist/angularcore.js"
-      ],
-      "flightplan": [
-        "../../flightplan/dist/flightplan.js"
-      ]      
+      ]
     }
   },
   "angularCompilerOptions": {

@@ -21,90 +21,45 @@ import {
   startAngularApplication,
 } from 'angular-core';
 
-import { Translations } from './i18n/registry';
+import { FlightPlanTranslations } from './i18n/registry';
 import { RootComponent } from './components/root/root';
-import { UAVListComponent } from './components/list/list';
-import { UAVDetailComponent } from './components/detail/detail';
-import { UAVCreateComponent } from './components/create/create';
-import { UAVDispatcherService } from './dispatcher/uav';
-export { UAVDispatcher, UAVDispatcherService } from './dispatcher/uav';
+import { FlightPlanDetailComponent } from './components/detail/detail';
+import { FlightPlanCreateComponent } from './components/create/create';
+import { FlightPlanDispatcherService, FlightPlanDispatcher } from './dispatcher/flightplan';
 
-
-import * as FlightPlan from 'flightplan';
+// defined exports to use the components and the module from the uav-digitaltwin dapp and to export
+// the dispatcher stuff
+export {
+  FlightPlanDetailComponent,
+  FlightPlanCreateComponent,
+  FlightPlanDispatcherService,
+  FlightPlanDispatcher,
+  FlightPlanTranslations
+}
 
 
 /**************************************************************************************************/
 
 function getRoutes(): Routes {
   return buildModuleRoutes(
-    `uavtwin.${ getDomainName() }`,
+    `uavflightplan.${ getDomainName() }`,
     RootComponent,
     getDashboardRoutes([
       {
         path: ``,
-        component: UAVListComponent,
+        component: FlightPlanCreateComponent,
         data: {
           state: 'list',
           navigateBack: true
         }
       },
       {
-        path: `create`,
-        component: UAVCreateComponent,
+        path: `:address`,
+        component: FlightPlanDetailComponent,
         data: {
-          state: 'create',
+          state: 'list',
           navigateBack: true
         }
-      },
-      {
-        path: `:address`,
-        data: {
-          state: 'contract',
-          navigateBack: true
-        },
-        children: [
-          {
-            path: ``,
-            data: {
-              state: 'contract',
-              navigateBack: true
-            },
-            component: UAVDetailComponent
-          },
-          {
-            path: 'flightplan-create',
-            data: {
-              state: 'contract',
-              navigateBack: true
-            },
-            component: FlightPlan.FlightPlanCreateComponent,
-          },
-          {
-            path: 'flightplan',
-            data: {
-              state: 'contract',
-              navigateBack: true
-            },
-            children: [
-              {
-                path: `:address`,
-                data: {
-                  state: 'contract',
-                  navigateBack: true
-                },
-                component: FlightPlan.FlightPlanDetailComponent
-              }
-            ]
-          },
-          {
-            path: '**',
-            data: {
-              state: 'contract',
-              navigateBack: true
-            },
-            component: DAppLoaderComponent,
-          }
-        ]
       }
     ])
   );
@@ -124,9 +79,10 @@ function getConfig(isDispatcher?: boolean) {
       AngularCore,
     ],
     providers: [
-      Translations,
-      UAVDispatcherService
+      FlightPlanTranslations,
+      FlightPlanDispatcherService
     ],
+    exports: []
   };
 
   if (!isDispatcher) {
@@ -143,14 +99,17 @@ function getConfig(isDispatcher?: boolean) {
     config.declarations = [
       BootstrapComponent,
       RootComponent,
-      UAVListComponent,
-      UAVCreateComponent,
-      UAVDetailComponent,
-      FlightPlan.FlightPlanCreateComponent,
-      FlightPlan.FlightPlanDetailComponent
+      FlightPlanDetailComponent,
+      FlightPlanCreateComponent
     ];
   }
 
+  config.exports.push(
+    FlightPlanCreateComponent
+  );
+  config.exports.push(
+    FlightPlanDetailComponent
+  );
   return config;
 }
 
@@ -160,17 +119,17 @@ export class DispatcherModule {
 }
 
 @NgModule(getConfig(false))
-class SeedModule {
-  constructor(private translations: Translations) { }
+class FlightPlanModule {
+  constructor(private translations: FlightPlanTranslations) { }
 }
 
 export async function startDApp(container, dbcpName) {
   const ionicAppEl = createIonicAppElement(container, dbcpName);
   
   // Add seed class name to the ion-app / .evan-dapp element for generalized styling
-  ionicAppEl.className += ' dt-uav-style';
+  ionicAppEl.className += ' flightplan-style';
 
-  await startAngularApplication(SeedModule, getRoutes());
+  await startAngularApplication(FlightPlanModule, getRoutes());
 
   container.appendChild(ionicAppEl);
 }

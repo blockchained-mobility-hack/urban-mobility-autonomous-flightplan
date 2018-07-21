@@ -115,6 +115,10 @@ export class UAVListComponent extends AsyncComponent {
     console.log('switch to cration of digital twin');
   }
 
+  goToDetail(dtAddress){
+     this.routingService.navigate(`./${ dtAddress }`);
+  }
+
   async loadContractList() {
     // load all contract addresses for my account, purge the crypto info and apply the contracts to
     // the contract list

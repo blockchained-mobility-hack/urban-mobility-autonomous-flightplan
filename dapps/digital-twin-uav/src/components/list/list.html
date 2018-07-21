@@ -29,7 +29,7 @@
             </ng-container>
           </div>
         </ion-avatar>
-        <ion-label class="clickable" (click)="openUAV(uav.contractAddress)">
+        <ion-label class="clickable" (click)="goToDetail(uav.contractAddress)">
           <h2>{{ uav.metadata.name }}</h2>
           <h4>{{ uav.metadata.type }}</h4>
           <h3>{{ uav.metadata.manufacturer }} : {{ uav.metadata.model }}</h3>
