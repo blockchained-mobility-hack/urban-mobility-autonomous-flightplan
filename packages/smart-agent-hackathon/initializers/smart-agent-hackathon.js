@@ -95,11 +95,30 @@ module.exports = class SmartAgentUAV extends Initializer {
         };
       }
 
+
+      // makes sure each listener only starts handlers for events relevant to it
+      makeFilter(listenerName) {
+        return function(event) {
+          const { eventType, contractType, member } = event.returnValues;
+          api.log(`event filter: ${listenerName}`)
+          return false
+        }
+      }
+      
       async initialize () { await super.initialize() }
 
       // generic listener to blockchain events
       async listen(serviceName, serviceAccount) {
         api.log(`Listening with ${serviceAccount} as ${serviceName}`)
+
+        // every listener needs an own handler
+        const handlers = {
+          insurance: async (event) => {}
+        }
+
+        await api.bcc.eventHub.subscribe('EventHub', null, 'ContractEvent',
+                                         this.makeFilter(serviceName),
+                                         handlers[serviceName]);
       }
       
     }
