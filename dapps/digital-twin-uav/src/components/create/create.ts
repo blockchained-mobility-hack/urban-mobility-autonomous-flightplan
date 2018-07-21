@@ -41,7 +41,7 @@ export class UAVCreateComponent extends AsyncComponent {
 
   @ViewChild('ViewChild') createForm: any;
 
-  private taxi: any = {};
+  private uav: any;
 
   constructor(
     private _DomSanitizer: DomSanitizer,
@@ -65,11 +65,42 @@ export class UAVCreateComponent extends AsyncComponent {
     setTimeout(() => this.ref.detectChanges());
   }
 
+  // set the initial default values for the air taxi
+  async _ngOnInit() {
+    this.uav = {
+      pilot: false,
+      owner: [ ]
+    };
+  }
 
   _ngOnDestroy() {
   }
 
-  createUAV() {
-    console.dir(this.taxi)
+  async createUAV() {
+    // ask if the user is ready to create
+    try {
+      await this.alertService.showSubmitAlert(
+        '_uav.question-create-uav',
+        '_uav.question-create-uav-question',
+        '_uav.cancel',
+        '_uav.ok',
+      );
+    } catch (ex) {
+      return;
+    }
+
+    //use the active account to set the owner for the twin
+    this.uav.owner = this.core.activeAccount();
+
+    // start the queue!
+    this.queueService.addQueueData(
+      new QueueId(
+        `uavtwin.${ getDomainName() }`,
+        'UAVDispatcher'
+      ),
+      this.uav
+    );
+
+    this.routingService.goBack();
   }
 }

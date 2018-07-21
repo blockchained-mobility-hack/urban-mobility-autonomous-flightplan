@@ -25,6 +25,8 @@ import { Translations } from './i18n/registry';
 import { RootComponent } from './components/root/root';
 import { UAVListComponent } from './components/list/list';
 import { UAVCreateComponent } from './components/create/create';
+import { UAVDispatcherService } from './dispatcher/uav';
+export { UAVDispatcher, UAVDispatcherService } from './dispatcher/uav';
 /**************************************************************************************************/
 
 function getRoutes(): Routes {
@@ -66,7 +68,8 @@ function getConfig(isDispatcher?: boolean) {
       AngularCore,
     ],
     providers: [
-      Translations
+      Translations,
+      UAVDispatcherService
     ],
   };
 
