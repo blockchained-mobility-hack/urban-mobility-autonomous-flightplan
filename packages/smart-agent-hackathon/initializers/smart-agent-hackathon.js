@@ -2,7 +2,7 @@
 var request = require('request')
 const { Initializer, api } = require('actionhero')
 const { Profile, KeyProvider, Ipld, ContractState, DataContract, Description, Sharing } = require('@evan.network/blockchain-core')
-const Mam = require('mam.client.js')
+const Mam = require('../libs/mam.client.js')
 const IOTA = require('iota.lib.js')
 
 // configuration shortcut
@@ -16,7 +16,8 @@ let mamState = Mam.init(iota)
 
 const iota_create = async packet => {
   // Create MAM Payload - STRING OF TRYTES
-  const message = Mam.create(mamState, packet)
+  const trytes = iota.utils.toTrytes(JSON.stringify(packet))
+  const message = Mam.create(mamState, trytes)
   // Save new mamState
   mamState = message.state
   // Attach the payload.
@@ -29,11 +30,11 @@ const iota_create = async packet => {
 
 const logData = data => console.log(JSON.parse(iota.utils.fromTrytes(data)))
 
-const iota_fetch = async message => {
+const iota_fetch = async rootKey => {
   // Fetch Stream Async to Test
-  console.dir(message)
-  const resp = await Mam.fetch(message.root, 'public', null, logData)
-  console.dir(resp)
+  const resp = await Mam.fetch(rootKey, 'public', null, logData)
+  iota_fetch(resp.nextRoot);
+
 }
 
 const listenerConnections = {}
@@ -192,7 +193,6 @@ module.exports = class SmartAgentUAV extends Initializer {
         return function(event) {
           const { eventType, contractType, member } = event.returnValues;
           const isit = member === config.listeners[listenerName] &&
-                contractType === taskContractType &&
                 eventType === '0'                      // invite
 
           api.log(`event filter: ${listenerName} ${isit}`)
@@ -279,7 +279,28 @@ module.exports = class SmartAgentUAV extends Initializer {
         const handlers = {
           insurance: async (event) => { this.iterateTodos(event, 'insurance', (lat, lng, alt) => {}, (p) => {})},
           weather: async (event) => { this.iterateTodos(event, 'weather', getWeather, denyWeather)},
-          flynex: async (event) => { this.iterateTodos(event, 'flynex', getFlyNex, denyFlyNex)}
+          flynex: async (event) => { this.iterateTodos(event, 'flynex', getFlyNex, denyFlyNex)},
+          iota: async (event) => { 
+            const contractAddress = event.returnValues.contractAddress
+            api.bcc.eventHub.once('BaseContractInterface', contractAddress, 'StateshiftEvent',
+            (event) => {
+              const { state } = event.returnValues;
+              return state && parseInt(state, 10) === ContractState.PendingApproval;
+            },
+            async () => {
+              // mark block/contract as done
+              const rootKey = iota_create('test');
+              const contract = api.bcc.contractLoader.loadContract('DataContractInterface', contractAddress)
+              await listenerConnections['iota'].dataContract.setEntry(contract, 'iotaStream', {root: rootKey.root}, config.listeners['iota'])
+
+              const counts = Array.from(Array(60).keys());
+              for(let count of counts) {
+                await iota_create(count);
+              }
+
+            });
+
+          }
         }
 
         await api.bcc.eventHub.subscribe('EventHub', null, 'ContractEvent',
@@ -298,12 +319,6 @@ module.exports = class SmartAgentUAV extends Initializer {
       listenerConnections[l] = smartAgentUAV.makeBCConnection(config.listeners[l])
       smartAgentUAV.listen(l, config.listeners[l])
     }
-
-    const message = await iota_create('Hola!')
-    await iota_create('Holala!')
-    await iota_create('Holalala!')
-    
-    iota_fetch(message)
     
   }
   

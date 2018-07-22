@@ -46,6 +46,7 @@ exports['default'] = {
         insurance: '0x20a6E2feD0e1518cd0a61B1946B3e9D064aB171b',
         flynex: '0x8958AED4D3a577298166526c37087578C5DB2Fd2',
         weather: '0xFCE2dfF569b6f715E83934d3CfCeff777916fFC7',
+        iota: '0xFCE2dfF569b6f715E83934d3CfCeff777916fFC7',
       }
     }
   }
