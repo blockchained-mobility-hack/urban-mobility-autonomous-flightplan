@@ -44,7 +44,7 @@ let battery_value = 100;
 function batteryData() {
   let diff = Math.random() * 5
   if((battery_value + diff) < 0 ) battery_value = 100
-  return { percent: battery_value - diff, time: (new Date()).getTime() }
+  return { percent: battery_value-= diff, time: (new Date()).getTime() }
 }
 
 
@@ -316,7 +316,7 @@ module.exports = class SmartAgentUAV extends Initializer {
               await listenerConnections['iota'].dataContract.setEntry(contract, 'iotaStream', {root: rootKey.root}, config.listeners['iota'])
               api.log(`Written IOTA root ${rootKey.root}`)
 
-              for(let count = 0; count < 60; ++count)
+              for(let count = 0; count < 7; ++count)
                   await iota_create(batteryData());
 
             });
