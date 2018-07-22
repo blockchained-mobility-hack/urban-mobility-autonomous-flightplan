@@ -12,6 +12,10 @@ exports['default'] = {
 
     // weather
     '0xFCE2dfF569b6f715E83934d3CfCeff777916fFC7' : '3e9a0130dae617e0b09e17a91072cc301fd203e4b24f1fe0c458621b18a32318',
+
+    // uav
+    '0x7919D19D8139DA3F01e9D6b87dFBd6bC7d9c10Dc' : 'ca0adb287a4138f06f95a59c9e543b841958c035cf3abd9295994c9eedbe97a0'
+
   },
 
   encryptionKeys: {
@@ -28,7 +32,9 @@ exports['default'] = {
     '0xc37f61a9120b12d41db131e6c2b632ec5fad6fdbb1d109d128906995fb969c1f' : '76d63f0a1bc0f4e243fd716a5073c4907436a46dae74e01747a694e67d1b5158',
     '0xb71f789a0089f63baddcbcacfd480bff023025385c07f6c6a141c5fadf0d24bd' : '76d63f0a1bc0f4e243fd716a5073c4907436a46dae74e01747a694e67d1b5158',
 
-    
+    // uav
+    '0x0def7b66df68d28713e19bbbb00ca1ff6fadeda331b53bae0f513cc20c571606' : '76d63f0a1bc0f4e243fd716a5073c4907436a46dae74e01747a694e67d1b5158',
+    '0x10ca724ab9ae7500af17eb9c03c02d2ab3c43ddec829b9fd9cd8cdeff7835239' : '76d63f0a1bc0f4e243fd716a5073c4907436a46dae74e01747a694e67d1b5158',
   },
   
   smartAgentUAV: (api) => {
@@ -46,7 +52,7 @@ exports['default'] = {
         insurance: '0x20a6E2feD0e1518cd0a61B1946B3e9D064aB171b',
         flynex: '0x8958AED4D3a577298166526c37087578C5DB2Fd2',
         weather: '0xFCE2dfF569b6f715E83934d3CfCeff777916fFC7',
-        iota: '0xFCE2dfF569b6f715E83934d3CfCeff777916fFC7',
+        iota:    '0xFCE2dfF569b6f715E83934d3CfCeff777916fFC7',
       }
     }
   }

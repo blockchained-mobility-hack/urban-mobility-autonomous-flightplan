@@ -37,6 +37,17 @@ const iota_fetch = async rootKey => {
 
 }
 
+
+// battery usage data source
+let battery_value = 100;
+
+function batteryData() {
+  let diff = Math.random() * 5
+  if((battery_value + diff) < 0 ) battery_value = 100
+  return { percent: battery_value - diff, time: (new Date()).getTime() }
+}
+
+
 const listenerConnections = {}
 
 // weather service handlers
@@ -107,6 +118,7 @@ module.exports = class SmartAgentUAV extends Initializer {
     if (config.disabled) return
 
     const taskContractType = api.eth.web3.utils.sha3('TaskDataContract')
+    const iotaContractType = '0x7797e4737a4e02aa9e65d4662837e33017ed157c740aa86c72045b880e2c587b'
 
     api.smartAgentUAV = { getRegulations: getFlyNex, }
 
@@ -190,12 +202,24 @@ module.exports = class SmartAgentUAV extends Initializer {
 
       // makes sure each listener only starts handlers for events relevant to it
       makeFilter(listenerName) {
+        // iota uses own contract type, which can be used to recognize those events
+        if(listenerName == 'iota') return function(event) {
+          const { eventType, contractType, member } = event.returnValues;
+          const isit = member === config.listeners[listenerName] &&
+                contractType == iotaContractType &&
+                eventType === '0'                      // invite
+
+          api.log(`event filter: ${listenerName} ${isit} ${member}`)
+          return isit
+        }
+        
         return function(event) {
           const { eventType, contractType, member } = event.returnValues;
           const isit = member === config.listeners[listenerName] &&
+                contractType == taskContractType &&
                 eventType === '0'                      // invite
 
-          api.log(`event filter: ${listenerName} ${isit}`)
+          api.log(`event filter: ${listenerName} ${isit} ${member}`)
           return isit
         }
       }
@@ -219,8 +243,6 @@ module.exports = class SmartAgentUAV extends Initializer {
         api.log(`handle UAV ${serviceName} ${account} task: ${contractAddress}`)
         
         try {
-
-
           const contract = bcc.contractLoader.loadContract('DataContractInterface', contractAddress)
 
           let entries = null;
@@ -237,7 +259,7 @@ module.exports = class SmartAgentUAV extends Initializer {
           
           for(let entry of entries ) {
             //const coord = entry.coordinates[0]
-
+            api.log(entry)
             const coord = { lat: 51, lng: 10, height: 200 }
             const p = query(coord.lat, coord.lng, coord.height)
 
@@ -289,14 +311,13 @@ module.exports = class SmartAgentUAV extends Initializer {
             },
             async () => {
               // mark block/contract as done
-              const rootKey = await iota_create('test');
+              const rootKey = await iota_create(batteryData());
               const contract = api.bcc.contractLoader.loadContract('DataContractInterface', contractAddress)
               await listenerConnections['iota'].dataContract.setEntry(contract, 'iotaStream', {root: rootKey.root}, config.listeners['iota'])
+              api.log(`Written IOTA root ${rootKey.root}`)
 
-              const counts = Array.from(Array(60).keys());
-              for(let count of counts) {
-                await iota_create(count);
-              }
+              for(let count = 0; count < 60; ++count)
+                  await iota_create(batteryData());
 
             });
 
@@ -307,7 +328,6 @@ module.exports = class SmartAgentUAV extends Initializer {
                                          this.makeFilter(serviceName),
                                          handlers[serviceName]);
       }
-      
     }
 
     // start the initialization code
