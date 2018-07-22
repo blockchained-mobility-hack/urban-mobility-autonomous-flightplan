@@ -1,5 +1,5 @@
 <evan-loading *ngIf="loading" delayLoading="500"></evan-loading>
-<ng-container *ngIf="!loading">
+<ng-container *ngIf="!loading"> 
   <ion-row>
     <ion-col col-6 col-md-6 text-center>
       <ion-label class="standalone">
@@ -14,7 +14,14 @@
       <span>{{ flightplan.metadata.endDate | date:'medium':'':translateService.translate.currentLang }}</span>
     </ion-col>
   </ion-row>
-  <h4 text-center margin-vertical>{{ flightplan.metadata.description }}</h4>
+  <h4 text-center margin-vertical>
+    {{ flightplan.metadata.description }}
+  </h4>
+  <div text-center margin-vertical>
+    <button [disabled]="!checkIfFlightCanBeStarted()" ion-button outline (click)="startFlight()">
+      {{ '_flightplan.start' | translate }}
+    </button>  
+  </div>
     <div class="evan-content evan-relative transparent no-padding">
       <agm-map
         [latitude]="flightplan.metadata.coordinates[0].lat"
@@ -56,15 +63,37 @@
       </table>
     </div>
   </div>
+  <div class="evan-content" *ngIf="iota_stream.length > 0">
+    <div class="table-responsive scroll-table">
+      <h3 class="content-header">{{ '_flightplan.iota_stream' | translate }}</h3>
+      <table>
+        <thead>
+          <tr>
+            <th>{{ '_flightplan.time' | translate }}</th>
+            <th>{{ '_flightplan.accu-percent' | translate }}</th>
+          </tr>
+        </thead>
+        <tbody>
+        <tr *ngFor="let m of iota_stream; let i = index">
+          <td>{{ m.time | date:'medium':'':translateService.translate.currentLang }}</td>
+          <td>{{ m.percent.toFixed(2) }} %</td>
+        </tr>
+      </tbody>
+      </table>
+    </div>
+  </div>  
   <div class="evan-content">
     <div class="table-responsive">
-      <h3 class="content-header">{{ '_uavflightplan.checks' | translate }}</h3>
+      <h3 class="content-header">
+        {{ '_flightplan.checks' | translate }} 
+        <ion-icon class="clickable reload-icon" margin-left name="refresh" (click)="_ngOnInit()"></ion-icon>
+      </h3>
       <table class="table table-hover">
         <thead>
           <tr>
-            <th>{{ '_uavflightplan.name' | translate }}</th>
-            <th>{{ '_uavflightplan.checks' | translate }}</th>
-            <th>{{ '_uavflightplan.status' | translate }}</th>
+            <th>{{ '_flightplan.name' | translate }}</th>
+            <th>{{ '_flightplan.checks' | translate }}</th>
+            <th>{{ '_flightplan.status' | translate }}</th>
             <th></th>
           </tr>
         </thead>
@@ -74,7 +103,7 @@
             <td>
               <span *ngIf="check.todos" [class.available]="check.solvedTodos == check.todos.length" [class.rented]="(check.solvedTodos < check.todos.length) || !check.solvedTodos">
                 {{ check.solvedTodos || '0' }}
-                {{ '_uavflightplan.from' | translate }}
+                {{ '_flightplan.from' | translate }}
                 {{ check.todos.length }}
               </span>
             </td>
@@ -83,13 +112,13 @@
                 [class.label-info]="check.solvedTodos != check.todos.length"
                 [class.label-success]="check.solvedTodos == check.todos.length">
                 <ng-container *ngIf="check.contractState == '1'">
-                  {{ '_uavflightplan.rejected' | translate }}
+                  {{ '_flightplan.rejected' | translate }}
                 </ng-container>
                 <ng-container *ngIf="check.solvedTodos == check.todos.length">
-                  {{ '_uavflightplan.success' | translate }}
+                  {{ '_flightplan.success' | translate }}
                 </ng-container>
                 <ng-container *ngIf="check.solvedTodos != check.todos.length">
-                  {{ '_uavflightplan.in-progress' | translate }}
+                  {{ '_flightplan.in-progress' | translate }}
                 </ng-container>
               </span>
             </td>

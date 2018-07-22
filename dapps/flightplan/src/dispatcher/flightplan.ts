@@ -112,29 +112,7 @@ export class FlightPlanDispatcherService {
     if(partners.length > 0) {
 
       for(let partner of partners) {
-        // get the content sharing key
-        const contentKey = await this.bcc.sharing.getKey(tasks.options.address, this.bcc.core.activeAccount(), '*');
-
-        // share the contract with the user
-        await this.bcc.sharing.addSharing(
-          tasks.options.address,
-          this.bcc.core.activeAccount(),
-          partner,
-          '*',
-          0,
-          contentKey,
-        );
-
-        const hashKey = await this.bcc.sharing.getHashKey(tasks.options.address, this.bcc.core.activeAccount());
-        await this.bcc.sharing.ensureHashKey(tasks.options.address, this.bcc.core.activeAccount(), partner, hashKey);
-
-                // invite user to contract
-        await this.bcc.dataContract.inviteToContract(
-          null,
-          tasks.options.address,
-          this.bcc.core.activeAccount(),
-          partner
-        );
+        await this.invitePartner(tasks.options.address, partner);
 
         // send the bmail to the invitee
         /*await this.bcc.mailbox.sendMail(
@@ -148,6 +126,34 @@ export class FlightPlanDispatcherService {
     
     return tasks.options.address;
   }
+
+
+  async invitePartner(contractAddress, partner) {
+    // get the content sharing key
+    const contentKey = await this.bcc.sharing.getKey(contractAddress, this.bcc.core.activeAccount(), '*');
+
+    // share the contract with the user
+    await this.bcc.sharing.addSharing(
+      contractAddress,
+      this.bcc.core.activeAccount(),
+      partner,
+      '*',
+      0,
+      contentKey,
+    );
+
+    const hashKey = await this.bcc.sharing.getHashKey(contractAddress, this.bcc.core.activeAccount());
+    await this.bcc.sharing.ensureHashKey(contractAddress, this.bcc.core.activeAccount(), partner, hashKey);
+
+            // invite user to contract
+    await this.bcc.dataContract.inviteToContract(
+      null,
+      contractAddress,
+      this.bcc.core.activeAccount(),
+      partner
+    );
+  }
+
 
   async doKeyExchange(targetAcc: string, alias: string) {
     const myAccountId = this.core.activeAccount();
@@ -284,6 +290,7 @@ export const FlightPlanDispatcher = new QueueDispatcher(
           if(!await service.bcc.profile.getContactKey('0x20a6E2feD0e1518cd0a61B1946B3e9D064aB171b','commKey')) {
             await service.doKeyExchange('0x20a6E2feD0e1518cd0a61B1946B3e9D064aB171b', 'Versicherung');
           }
+
           await service.bcc.profile.storeForAccount(service.bcc.profile.treeLabels.addressBook);
 
           await Promise.all([
@@ -292,6 +299,15 @@ export const FlightPlanDispatcher = new QueueDispatcher(
               service.core.activeAccount(),              // account, that can change permissions
               0,                  // role id, uint8 value
               'technicalData',                // name of the object
+              service.propType.Entry,         // what type of element is modified
+              service.modType.Set,       // type of the modification
+              true,                       // grant this capability
+            ),
+            service.bcc.rightsAndRoles.setOperationPermission(
+              flightPlanDT,        // contract to be updated
+              service.core.activeAccount(),              // account, that can change permissions
+              1,                  // role id, uint8 value
+              'iotaStream',                // name of the object
               service.propType.Entry,         // what type of element is modified
               service.modType.Set,       // type of the modification
               true,                       // grant this capability
@@ -308,6 +324,8 @@ export const FlightPlanDispatcher = new QueueDispatcher(
             service.bcc.dataContract.addListEntries(flightplan.uavContractAddress, 'flightPlans', [flightPlanDT.options.address], service.core.activeAccount()),
             service.bcc.dataContract.setEntry(flightPlanDT, 'technicalData', flightplan.technicalData, service.core.activeAccount())
           ]);
+
+          await service.invitePartner(flightPlanDT.options.address, '0xFCE2dfF569b6f715E83934d3CfCeff777916fFC7');
 
           await service.bcc.profile.loadForAccount(service.bcc.profile.treeLabels.contracts);
 

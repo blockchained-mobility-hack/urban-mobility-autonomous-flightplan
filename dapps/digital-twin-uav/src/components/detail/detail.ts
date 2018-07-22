@@ -138,6 +138,26 @@ export class UAVDetailComponent extends AsyncComponent {
         );
       } catch (ex) { }
     }
+
+    // setup queue
+    this.flightplanQueueId = new QueueId(
+      `flightplan.${ getDomainName() }`,
+      'FlightPlanDispatcher'
+    );
+
+    // watch for queue updates
+    this.clearQueue = await this.queueService.onQueueFinish(this.flightplanQueueId, async (reload) => {
+      await this.core.utils.timeout();
+
+      // load the queue entries
+      this.loadFlightsFromQueue();
+
+      // reset flightplans and reload the new ones 
+      if (reload) {
+        // reload the contract list
+        await this.reloadFlightPlans();
+      }
+    });        
   }
 
   _ngOnDestroy() {
@@ -183,6 +203,21 @@ export class UAVDetailComponent extends AsyncComponent {
         this.ref.detectChanges();
       }));
     }
+  }
+
+  loadFlightsFromQueue() {
+    this.queueFlightPlans = this.queueService.getQueueEntry(this.flightplanQueueId, true).data;
+
+    this.queueFlightPlans = this.queueFlightPlans
+      .filter(flightplan => flightplan.uavContractAddress === this.contractAddress)
+      .map(entry => {
+        return {
+          metadata: entry.technicalData,
+          loading: true
+        };
+      });
+
+    this.ref.detectChanges();
   }
 
   createNewFlightPlan() {

@@ -22,7 +22,7 @@
   <ion-list class="evan-grid" *ngIf="digitalTwins.length !== 0">
     <ion-item-sliding *ngFor="let uav of [ ].concat(digitalTwins)" #sliding>
       <ion-item color="light">
-        <ion-avatar class="clickable" item-start (click)="openUAV(uav.contractAddress)">
+        <ion-avatar class="clickable" item-start (click)="goToDetail(uav.contractAddress)">
           <div class="evan-avatar-wrapper">
             <ng-container *ngIf="uav.metadata.picture">
               <img *oneTime [src]="_DomSanitizer.bypassSecurityTrustUrl(uav.metadata.picture)" />

@@ -51,6 +51,9 @@ export class FlightPlanDetailComponent extends AsyncComponent {
 
   private contractAddress;
   private flightplan;
+  private iota_stream;
+  private iota;
+  private iotaKey;
   constructor(
     private core: EvanCoreService,
     private bcc: EvanBCCService,
@@ -70,10 +73,21 @@ export class FlightPlanDetailComponent extends AsyncComponent {
   }
 
   async _ngOnInit() {
+
+   this.iota = new (<any>window).IOTA({ provider: 'https://testnet140.tangle.works'});
+
+   (<any>window).Mam.setIOTA(this.iota);
     // get contract address from url
     this.contractAddress = this.routingService.getHashParam('address');   
    
     try {
+      this.iotaKey = await this.bcc.dataContract.getEntry(this.contractAddress, 'iotaStream', this.core.activeAccount());
+       if(this.iotaKey) {
+         this.iota_fetch(this.iotaKey.root)
+         this.iota_stream = [];
+       }
+      
+
       // load the technical informations
       this.flightplan = await this.loadFlightPlan(this.contractAddress, () => {
         this.ref.detectChanges();
@@ -93,6 +107,25 @@ export class FlightPlanDetailComponent extends AsyncComponent {
     }
   }
 
+
+  checkIfFlightCanBeStarted() {
+    let check = false;
+    for(let checkTask of this.flightplan.checks) {
+      check = checkTask.solvedTodos == checkTask.todos.length
+    }
+    return check;
+  }
+
+ async iota_fetch(rootKey) {
+    // Fetch Stream Async to Test
+    const resp = await (<any>window).Mam.fetch(rootKey, 'public', null, (data) => {
+      this.iota_stream.push(JSON.parse(this.iota.utils.fromTrytes(data)));
+      this.ref.detectChanges();
+    })
+
+    this.iota_fetch(resp.nextRoot);
+  }
+
   /**
    * If the dapp is loaded directly with an contract address as parameter, we need to trick the
    * dapp-loader, to load not the uav contract address, but the contract addresses load for the uav
@@ -103,6 +136,14 @@ export class FlightPlanDetailComponent extends AsyncComponent {
     this.elementRef.nativeElement.id = this.contractAddress;
   }
 
+  async startFlight() {
+    await this.bcc.dataContract.changeContractState(
+      this.contractAddress,
+      this.core.activeAccount(),
+      3
+    );
+    await this._ngOnInit();
+  }
   /**
    * Loads a flightplan and its sub tasks. Sets several statuses and sub tasks stuff.
    *

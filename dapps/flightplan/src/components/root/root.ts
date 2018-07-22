@@ -61,9 +61,7 @@ export class RootComponent extends AsyncComponent {
 
   async _ngOnInit() {
     await this.bcc.initialize((accountId) => this.bcc.globalPasswordDialog(accountId));
-
     this.watchRouteChange = this.routingService.subscribeRouteChange(() => this.ref.detectChanges());
-
     this.core.finishDAppLoading();
   }
 

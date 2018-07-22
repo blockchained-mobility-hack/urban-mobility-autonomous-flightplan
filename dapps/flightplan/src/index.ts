@@ -71,7 +71,8 @@ function getRoutes(): Routes {
             path: ``,
             data: {
               state: 'contract',
-              navigateBack: true
+              navigateBack: true,
+              reload: [ 'contracts' ]
             },
             component: FlightPlanDetailComponent
           },

@@ -1,5 +1,10 @@
 export const en ={
+  'flightplan-create': 'Create flightplan',
   "_flightplan": {
+  	"iota_stream": 'IOTA Datastream',
+  	"accu-percent": 'Accu percent',
+  	'start': 'Start flight',
+  	"time": 'Time',  	
     "cancel": "Cancel",
     "checks": "Checks",
     "coordinates": "Coordinates",

@@ -1,5 +1,10 @@
 export const de = {
+  'flightplan-create': 'Flugplan erstellen',
   "_flightplan": {
+  	"iota_stream": 'IOTA Datenstrom',
+  	"accu-percent": 'Akku ladestand',
+  	"time": 'Zeit',
+  	'start': 'Flug starten',
     "cancel": "Abbrechen",
     "checks": "Prüfungen",
     "coordinates": "Koordinaten",

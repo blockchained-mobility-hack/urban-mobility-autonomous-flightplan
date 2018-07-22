@@ -289,7 +289,7 @@ module.exports = class SmartAgentUAV extends Initializer {
             },
             async () => {
               // mark block/contract as done
-              const rootKey = iota_create('test');
+              const rootKey = await iota_create('test');
               const contract = api.bcc.contractLoader.loadContract('DataContractInterface', contractAddress)
               await listenerConnections['iota'].dataContract.setEntry(contract, 'iotaStream', {root: rootKey.root}, config.listeners['iota'])
 

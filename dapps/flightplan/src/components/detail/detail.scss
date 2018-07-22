@@ -9,4 +9,13 @@ flightplan-detail {
   .no-padding {
     padding: 0 !important;
   }
+
+
+  .scroll-table {
+    tbody {
+      overflow:auto;
+      height:300px;
+      width:100%;
+    }
+  }
 }

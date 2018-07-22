@@ -34,7 +34,10 @@
       ],
       "task": [
         "../../../node_modules/@evan.network/task/dist/task.js"
-      ]
+      ],
+      "mam": [
+        "src/libs/mam.web.js"
+      ]      
     }
   },
   "angularCompilerOptions": {

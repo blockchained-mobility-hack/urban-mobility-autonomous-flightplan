@@ -94,7 +94,17 @@
       </ion-item>
     </div>
 
-
+  <div class="evan-content">
+    <h2 class="content-header m-b-0">{{ '_uav.drone-picture' | translate }}</h2>
+    <span>{{ '_uav.fill-required-pic' | translate }}</span>
+    <div text-center margin-top>
+      <label class="image-picker-content" for="image-picker">
+          <img id="image-preview" [src]="_DomSanitizer.bypassSecurityTrustUrl(uav.picture)"/>
+          <div style="display:block" ion-button outline round margin-top>{{ '_uav.change-pic' | translate }}</div>
+      </label>
+      <input id="image-picker" type="file" (change)="changeImg($event)" accept="image/*" />
+    </div>
+  </div>
     <div class="evan-content evan-mini-content" text-center>
       <button ion-button icon-left outline round margin-top
         [disabled]="!createForm.form.valid"
