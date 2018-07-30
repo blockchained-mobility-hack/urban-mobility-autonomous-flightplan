@@ -3,7 +3,9 @@
 ## Team
 
 Stev Heinert - Design & Presentations
+
 Jan Schukat -  Backend and Smart Contracts developer
+
 Sebastian Dechant - Frontend and Backend developer
 
 ## Install
