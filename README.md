@@ -1,4 +1,10 @@
-# evan-dapps-seed
+# urban mobility autonomous flightplan
+
+## Team
+
+Stev Heinert - Design & Presentations
+Jan Schukat -  Backend and Smart Contracts developer
+Sebastian Dechant - Frontend and Backend developer
 
 ## Install
 - you very likely will need `nvm` installed
